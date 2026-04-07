@@ -30,7 +30,7 @@ lapply(pkgs, library, character.only = TRUE)
 - both are fully compatible with one another
 - both are fully compatible with external packages
 - you can do amazing things by relying on one, on the other, or on both
-- we will use whichever best suits our purposes (but, mostly, specialized packages like `brms`, `modelsummary` and `marginaleffects`)
+- we will use whichever best suits our purposes (but, mostly, specialized packages like `brms`, `modelsummary`, and `marginaleffects`)
 
 ### Some important base R
 

@@ -1,7 +1,12 @@
-﻿file,title,learnr,pdf,html,html_sol
-01-01-lec.rmd,Lecture: Probability Distributions and Frequentist Inference,inst/tutorials/01-01-lec,lecture-materials,,
-01-02-lec.rmd,Lecture: Bayesian Fundamentals,inst/tutorials/01-02-lec,lecture-materials,,
-01-03-lab.rmd,Lab: Bayesian and Frequentist Inference,inst/tutorials/01-03-lab,,lab-materials,lab-materials
-02-01-lec.rmd,Lecture: Applied Bayesian Statistics I,inst/tutorials/02-01-lec,lecture-materials,,
-02-02-lec.rmd,Lecture: Applied Bayesian Statistics II,inst/tutorials/02-02-lec,lecture-materials,,
-02-03-lab.rmd,Lab: Applied Bayesian Statistics,inst/tutorials/02-03-lab,,lab-materials,lab-materials
+file,title,learnr,pdf,html,html_sol
+01-01-lec.rmd,"Lecture: Introduction, R refresher, and limitations of frequentist inference",inst/tutorials/01-01-lec,lecture-materials,,
+01-02-lec.rmd,Lecture: Fundamental concepts in Bayesian inference,inst/tutorials/01-02-lec,lecture-materials,,
+01-03-lab.rmd,Lab 1: Conceptual foundations,inst/tutorials/01-03-lab,,lab-materials,lab-materials
+02-01-lec.rmd,Lecture: Going Bayesian in applied research,inst/tutorials/02-01-lec,lecture-materials,,
+02-02-lec.rmd,Lecture: Doing Bayesian data analysis with brms,inst/tutorials/02-02-lec,lecture-materials,,
+02-03-lab.rmd,Lab 2: Using brms,inst/tutorials/02-03-lab,,lab-materials,lab-materials
+03-01-lec.rmd,"Lecture: Linear algebra basics, generalized linear models, and programming basics",inst/tutorials/03-01-lec,lecture-materials,,
+03-02-lec.rmd,Lecture: Programming and modeling in Stan,inst/tutorials/03-02-lec,lecture-materials,,
+03-03-lab.rmd,Lab 3: Using rstan,inst/tutorials/03-03-lab,,lab-materials,lab-materials
+04-01-lec.rmd,Lecture: Programming and modeling in Stan: extensions,inst/tutorials/04-01-lec,lecture-materials,,
+04-02-lec.rmd,Lecture: Choosing between pre-implemented and custom solutions,inst/tutorials/04-02-lec,lecture-materials,,
