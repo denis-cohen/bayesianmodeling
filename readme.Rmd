@@ -3,48 +3,28 @@ output:
   rmarkdown::github_document
 ---
 
-Introduction to Bayesian Statistics
+Bayesian Modeling: From Foundations to Custom Solutions
 ================
 Denis Cohen  
 <denis.cohen@uni-mannheim.de>
 
-*Version: GESIS Training Program, 2025-03-19*
+*Version: GESIS Training Program, April 2026*
 
 ## Abstract
 
-Bayesian methods for inference and prediction have become widespread in the social sciences (and beyond). Over the last decades, applied Bayesian modeling has evolved from a niche methodology with high computational and software-specific entry barriers to a readily available toolbox that virtually everyone can use by running pre-implemented packages in standard statistical software on generic PCs. Although Bayesian methods are now more accessible than ever before, aspiring Bayesian practitioners may be overwhelmed by questions and choices - including, but not limited to, when and why to use Bayesian methods in applied research, how to implement and interpret Bayesian analyses, or which software to use.
+Bayesian methods have become increasingly central to the social sciences and many adjacent fields. Once a niche methodology with steep computational and software entry barriers, Bayesian statistics is now a readily accessible toolbox available through user-friendly interfaces in R. Yet, despite the growing popularity of these methods, many researchers remain unsure when and why to use Bayesian approaches, how to interpret their results, and how to move beyond standard pre-implemented model types toward custom solutions.
  
-This workshop is designed to help participants take these first steps. It juxtaposes frequentist and Bayesian approaches to estimation and inference, highlights the distinct characteristics and advantages of Bayesian methods, and introduces participants to the Bayesian workflow and applied modeling using the R package brms - an accessible interface to the probabilistic programming language Stan, which allows users to perform Bayesian inference with state-of-the-art algorithms by running little more than a few lines of code in R.
+This four-day workshop, spread across two weeks, provides an integrated path from foundations to custom applications of Bayesian modelling. The first half introduces participants to the core ideas and workflow of Bayesian statistics, juxtaposing Bayesian and frequentist perspectives, covering estimation, inference, and prediction, and demonstrating how to use the R package brms for applied Bayesian modelling with minimal coding effort. The second half then opens the black box: participants learn how to build their own Bayesian models in Stan, the probabilistic programming language underlying brms. Through a combination of conceptual input, guided lab sessions, and hands-on coding exercises, participants will gain both the theoretical grounding and practical skills to understand, use, and design Bayesian models for their own research questions---ranging from straightforward applications to fully custom model specifications.
+ 
+By the end of the course, participants will be familiar with the Bayesian workflow, fluent in interpreting and diagnosing Bayesian models in R, and capable of implementing tailored modelling solutions in Stan that go beyond the limits of off-the-shelf packages.
 
 
-## Prerequisites
-
-Working knowledge of the software environment `R` as well as working
-knowledge of (generalized) linear models is required for participation
-in this course.
+## Software Requirements
 
 This workshop requires installations of recent versions of [`R`](https://cran.r-project.org/mirrors.html), [`RStudio`](https://rstudio.com/products/rstudio/download/#download), as well as the packages [`rstan`](https://cran.r-project.org/web/packages/rstan/index.html), [`brms`](https://cran.r-project.org/web/packages/brms/index.html) (which depends on `rstan`), and [`marginaleffects`](https://cran.r-project.org/web/packages/marginaleffects/index.html).
 
 Setting up `rstan` can be somewhat time-consuming as it requires the installation of a free-of-charge C++ compiler. Before the workshop, participants should follow [these
 instructions](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started) on the Stan Development Team's GitHub to install and configure the `rstan` package and its prerequisites on their operating system. If you do not have administrator privileges on your machine, please approach your system administrator in advance of the workshop. Should you encounter problems, feel free to send me an email.
-
-## Schedule
-
-The workshop consists of eights sessions à 90 minutes:
-
-1. Day 1
-    1. 09:00-10:30 (lecture)
-    2. 10:45-12:15 (lecture)
-    3. 13:45-15:15 (lab)
-1. Day 2
-    1. 09:00-10:30 (lecture)
-    2. 10:45-12:15 (lecture)
-    3. 13:45-15:15 (lab)
-1. Day 3
-    1. 09:00-10:30 (lab -- data projects)
-    2. 10:45-12:15 (concluding discussion)
-    
-
 
 ## Course Structure
 

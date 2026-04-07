@@ -310,9 +310,10 @@ lm_brms
 Let's explore the following visualizations of common generic diagnostics:
 
 ```{r brms-visual, exercise=TRUE, eval=eval_ex, exercise.lines = 3}
-brms::mcmc_plot(lm_brms, type = "rhat")  # Gelman-Rubin 
-brms::mcmc_plot(lm_brms, type = "acf")   # Autocorrelation
-brms::mcmc_plot(lm_brms, type = "trace") # Trace plots
+brms::mcmc_plot(lm_brms, type = "rhat") +  # Gelman-Rubin 
+  bayesplot::yaxis_text(hjust = 1)
+brms::mcmc_plot(lm_brms, type = "acf")     # Autocorrelation
+brms::mcmc_plot(lm_brms, type = "trace")   # Trace plots
 ```
 
 
