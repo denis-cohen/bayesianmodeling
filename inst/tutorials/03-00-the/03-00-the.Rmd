@@ -1,0 +1,25 @@
+---
+title: "Take-Home Exercise"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    css: css/learnr-theme.css
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+## ---- CRAN Packages ----
+## Save package names as a vector of strings
+pkgs <-  c("dplyr", "MASS", "ggplot2", "ggpubr")
+
+## Install uninstalled packages
+lapply(pkgs[!(pkgs %in% installed.packages())],
+       install.packages,
+       repos='http://cran.us.r-project.org')
+
+## Load all packages to library and adjust options
+lapply(pkgs, library, character.only = TRUE)
+```

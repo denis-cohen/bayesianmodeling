@@ -1,5 +1,5 @@
 ---
-title: "Introduction to Bayesian Statistics"
+title: "Bayesian Modeling"
 output: 
   learnr::tutorial:
     progressive: true
@@ -38,15 +38,12 @@ lapply(pkgs, library, character.only = TRUE)
     - voting behavior
     - quantitative social science (both pedagogical and methodological)
 
-### Hi, I'm Franziska
+### Hi, I'm Maria
  
-- Master Student in Political Science, University of Mannheim
-- B.A. (Political Science and Sociology), Ruprecht Karls Universität Heidelberg (2023)
-- Student Assistant at ALLBUS, GESIS Leibniz Institute for the Social Sciences, Mannheim
-- I’m interested in:
-    - International Relations
-    - Global Governance
-    - European Union
+- Master's Student in Sociology, University of Mannheim
+- B.A. (Political Science and Economics), Goethe University Frankfurt am Main (2024)
+- Student Assistant at Mannheim Centre for European Social Research
+- I'm interested in: political sociology, quantitative methods 
 
 ### Who are you?
 
@@ -54,42 +51,91 @@ lapply(pkgs, library, character.only = TRUE)
 - Your discipline and current position
 - What brought you here
 
-## Introduction to Bayesian Statistics
+## Bayesian Modeling: From Foundations to Custom Solutions
 
-###  Learning Objectives
+###  Week 1: Learning Objectives
+
+#### Conceptual: Foundations of Bayesian inference
 
 1. Contrast frequentist and Bayesian inference paradigms
 1. Understand when and why researchers go Bayesian
 1. Understand the basics of analytical and (especially) numerical Bayesian inference
 1. Understand the costs and benefits of doing applied Bayesian data analysis
-1. Perform applied Bayesian data analysis using the R package `brms` (Bayesian Regression Models using 'Stan')
 
-### The end goal
+#### Practical: Applied Bayesian data analysis using pre-implemented tools
 
-Empower you to 
+1. Estimate and diagnose models using `brms`
+1. Process and report model estimates using `modelsummary` and `marginaleffects`
 
-- implement
-- execute 
-- process
-- scrutinize
-- understand
+### Day 1: Bayesian and frequentist inference: A juxtaposition
 
-Bayesian data analysis using pre-implemented tools.
+- Conceptual foundations and intuition
+- Little to no code and programming
+- Focus on *understanding*
 
-### Advanced Bayesian Statistical Modeling Using R and Stan
+### Day 2: Applied Bayesian statistics: A gentle introduction
 
-This course's older sibling will take place May 20-22, 2025, in the GESIS Training Program.
+- Applied data analysis using pre-implemented tools
+- Estimating and processing Bayesian models via `brms`, `modelsummary`, and `marginaleffects`
+- Focus on *using* existing tools 
 
-The key differences in terms of focus:
+###  Week 2: Learning Objectives
 
-- Stronger focus on statistical modeling
-- Focus on building, as opposed to using models
+#### Conceptual: A peek under the hood
 
-The key differences in terms of prerequisites and technicality:
+1. Understand generalized linear models as a common theoretical framework for statistical models
+1. Understand how to process estimates from generalized linear models into substantively meaningful quantities of interest *without* relying on pre-implemented software
 
-- Stronger focus on the mathematical foundations of probability distributions
-- Stronger focus on programming
-- Stronger focus on the Stan language, as opposed to the `brms` front-end
+#### Practical: Custom model building in Stan
+
+1. Learn how to translate your own statistical models into code using Stan
+1. Learn how to implement the Bayesian workflow as a model developer, as opposed to a model user
+
+### Self-learning: Take-home exercise
+
+As a segue from Week 1 to Week 2, I have prepared a self-learning module that covers the following topics:
+
+- Linear algebra and programming basics (self-learn module)
+- Applied statistical programming in R
+
+### Self-learning: Your own project
+
+- Becoming an active Bayesian practitioner requires practice!
+- The challenges you may encounter along the way will likely be idiosyncratic
+
+Therefore, I encourage you to:
+
+  - Start exploring Bayesian implementations using `brms` after Week 1
+  - Attend individual consultations at the end of Session 4 to address any questions you have encountered
+
+*Note:* At the same time, Maria will be available for consultations about any aspects of the course.
+
+
+### Day 3: Statistical programming in R and Stan: An advanced introduction
+
+- Generalized linear models and quantities of interest
+- Coding and validating a Bayesian model from scratch using Stan
+- Focus on *building* your own models
+
+### Day 4: Applied Bayesian modeling in Stan
+
+- Extensions to the basic workflow
+- Post-processing posterior draws
+- Choosing between pre-implemented and custom solutions
+- **Individual consultations**: Bring your own data and model and get help with implementation, inference, and workflow
+
+### In short
+
+#### Week 1
+
+1. Understand concepts (today)
+1. Use existing tools (tomorrow)
+
+#### Week 2
+
+1. Understand underlying mechanics
+1. Extend tools
+1. Decide how to proceed in your own work
 
 ### A quick note on mathematical notation
 
@@ -104,11 +150,11 @@ The key differences in terms of prerequisites and technicality:
 
 ### GitHub
 
-All course materials are available on my GitHub: https://github.com/denis-cohen/bayesintro 
+All course materials are available on my GitHub: https://github.com/denis-cohen/bayesianmodeling 
 
 ### Interactive tutorials
 
-The primary course materials come as `learnr` tutorials wrapped in an R package, `bayesintro`.
+The primary course materials come as `learnr` tutorials wrapped in an R package, `bayesianmodeling`.
 
 You can use the interactive materials to:
 
@@ -118,36 +164,45 @@ You can use the interactive materials to:
 To download, install, and use the interactive materials, run this code that you can copy from GitHub and paste into R:
 
 ```{r, eval=FALSE, echo=TRUE}
-# Detach if loaded
-if ("bayesintro" %in% (.packages())) {
-  detach(package:bayesintro, unload = TRUE)
+# Package installation ----
+## Detach if loaded ----
+if ("bayesianmodeling" %in% (.packages())) {
+  detach(package:bayesianmodeling, unload = TRUE)
 }
 
-# Uninstall if installed
-if ("bayesintro" %in% installed.packages()) {
-  remove.packages("bayesintro")
+## Uninstall if installed ----
+if ("bayesianmodeling" %in% installed.packages()) {
+  remove.packages("bayesianmodeling")
 }
 
-# Install if not installed
+## Install if not installed ----
 if (!("devtools" %in% installed.packages())) {
   install.packages("devtools")
 }
 
-# Load from GitHub
+## Load from GitHub ----
 library(devtools)
-devtools::install_github("denis-cohen/bayesintro")
+devtools::install_github("denis-cohen/bayesianmodeling")
 
-# Load to library
-library(bayesintro)
+## Load to library ----
+library(bayesianmodeling)
 
-# Run tutorials (one at a time)
-learnr::run_tutorial("00-00-int", package = "bayesintro")
-learnr::run_tutorial("01-01-lec", package = "bayesintro")
-learnr::run_tutorial("01-02-lec", package = "bayesintro")
-learnr::run_tutorial("01-03-lab", package = "bayesintro")
-learnr::run_tutorial("02-01-lec", package = "bayesintro")
-learnr::run_tutorial("02-02-lec", package = "bayesintro")
-learnr::run_tutorial("02-03-lab", package = "bayesintro")
+# Run the tutorials (one at a time) ----
+## Introduction ----
+learnr::run_tutorial("00-00-int", package = "bayesianmodeling")
+
+## Day 1 ----
+learnr::run_tutorial("01-01-lec", package = "bayesianmodeling")
+learnr::run_tutorial("01-02-lec", package = "bayesianmodeling")
+learnr::run_tutorial("01-03-lab", package = "bayesianmodeling")
+
+## Day 2 ----
+learnr::run_tutorial("02-01-lec", package = "bayesianmodeling")
+learnr::run_tutorial("02-02-lec", package = "bayesianmodeling")
+learnr::run_tutorial("02-03-lab", package = "bayesianmodeling")
+
+## Take home exercise ----
+learnr::run_tutorial("03-00-the", package = "bayesianmodeling")
 ```
 
 ### Static course materials
@@ -166,22 +221,6 @@ Along with the data used in this course, these materials are available:
 
 ## Schedule
 
-### Sessions
-
-| Session | Session          | Topics                                                                             |
-| :-----: | ---------------: | :----------------------------------------------------------------------------------|
-|    1.1  | Wed, 09:00-10:30 | *Lecture:* R and Frequentist Inference: A Refresher                            |
-|    1.2  |      10:45-12:15 | *Lecture:* Bayesian Fundamentals                                               |
-|    1.3  |      13:45-15:15 | Lab session Day 1                                                              |
-|    2.1  | Thu, 09:00-10:30 | *Lecture:*Applied Bayesian Statistics I: Basics & Workflow                     |
-|    2.2  |      10:45-12:15 | *Lecture:*Applied Bayesian Statistics II: Using brms                           |
-|    2.3  |      13:45-15:15 | Lab session: Exercises and solutions                                           |
-|    3.1  | Fri, 09:00-11:00 | Applied Bayesian Statistics III: Implementing a small data project using brms  |    
-|    3.2  |      11:15-12:15 | Wrap-up                                                                        |
-|         |                  | - Review of challenges and potentials encountered in working on your data projects |
-|         |                  | - Outlook: Moving forward as Bayesian practitioners                                |
-|         |                  | - Course evaluations and feedback                                                  |
-
 ### Structure of our sessions
 
 1. Lecture:
@@ -190,24 +229,14 @@ Along with the data used in this course, these materials are available:
 2. Lab: Hands-on exercises (in small teams)
     - You will be assigned to small teams in breakout rooms
     - I will be in the main meeting, available for questions
+    - The TA will switch between breakout rooms to assist you
     - We will jointly discuss your answers and the solutions in the main meeting
-
-### Session 3.1: Implementing a small data project using brms
-
-- Becoming an active Bayesian practitioner requires practice!
-- The challenges you may encounter along the way will likely be idiosyncratic
-- Therefore, Session 3.1 gives you the chance to implement the Bayesian workflow using your own data
-- This can be an analysis you are about to run for the first time or a replication of your or others' existing work, as long as:
-    - Pre-processing is complete: Your data is ready to go for data analysis
-    - Neither your data nor your model are highly complex (if they are: start with a small subset of the data, gradually build up model complexity)
-- I will be available for questions throughout Session 3.1
-- We will jointly discuss your experiences and the main challenges you encountered at the start of Session 3.2
 
 ### RStan/brms installation: Any problems?
 
 Did you successfully get RStan to run on your machine, incl. `example(stan_model, package = "rstan", run.dontrun = TRUE) `?
 
-- If yes: Great! You're all set!
+- If yes: Great! You're all set.
 - If no: No worries, we will start using `brms` *tomorrow*. I will stick around after 15:15 today in case you need assistance.
 
 ## Questions?

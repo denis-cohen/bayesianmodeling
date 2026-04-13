@@ -28,39 +28,50 @@ instructions](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started) on t
 
 ## Course Structure
 
-| Day | Session | Topics |
-| :-- | :------ | :----- |
-| **Day 1 (April 16): Bayesian and frequentist inference - A juxtaposition** |  |  |
-|  | **Morning session I (9:00-10:30)** | Introduction |
-|  |  | Refresher on R and frequentist inference |
-|  |  | Limitations of frequentist inference |
-|  | **Morning session II (10:45-12:15)** | Fundamental concepts in Bayesian inference |
-|  |  | Analytical Bayes |
-|  |  | Numerical Bayes via Markov-Chain Monte Carlo sampling |
-|  | **Afternoon session (13:45-15:15)** | Group exercises |
-|  |  | Solutions and discussion |
-| **Day 2 (April 17): Applied Bayesian statistics - A gentle introduction** |  |  |
-|  | **Morning session I (9:00-10:30)** | Going Bayesian in applied research: When, why, and how? |
-|  |  | Software solutions: An overview |
-|  |  | The Bayesian workflow |
-|  | **Morning session II (10:45-12:15)** | The brms package: Functionality |
-|  |  | Doing Bayesian data analysis with brms: A step-by-step walkthrough |
-|  | **Afternoon session (13:45-15:15)** | Group exercises |
-|  |  | Solutions and discussion |
-| **Day 3 (April 23) Statistical programming in R and Stan - An advanced introduction** |  |  |
-|  | **Morning session I (9:00-10:30)** | Linear algebra basics |
-|  |  | Generalized linear models |
-|  |  | Programming basics |
-|  | **Morning session II (10:45-12:15)** | Stan: Programming language and documentation |
-|  |  | Programming and modeling in Stan: implementation, inference, and workflow |
-|  | **Afternoon session (13:45-15:15)** | Group exercises |
-|  |  | Solutions and discussion |
-| **Day 4 (April 24) Applied Bayesian modeling in Stan** |  |  |
-|  | **Morning session I (9:00-10:30)** | Programming and modeling in Stan: extensions |
-|  |  | Efficiency tuning |
-|  |  | Post-processing posterior draws |
-|  | **Morning session II (10:45-12:15)** | Choosing between pre-implemented and custom solutions |
-|  | **Afternoon session (13:45-15:15)** | Individual consultations |
+### Week 1
+
+| Session | Topics |
+| :------ | :----- |
+| **Day 1 (April 16): Bayesian and frequentist inference - A juxtaposition** |  |
+| **Morning session I (9:00-10:30)** | Introduction |
+|  | Refresher on R and frequentist inference |
+|  | Limitations of frequentist inference |
+| **Morning session II (10:45-12:15)** | Fundamental concepts in Bayesian inference |
+|  | Analytical Bayes |
+|  | Numerical Bayes via Markov-Chain Monte Carlo sampling |
+| **Afternoon session (13:45-15:15)** | Group exercises |
+|  | Solutions and discussion |
+| **Day 2 (April 17): Applied Bayesian statistics - A gentle introduction** |  |
+| **Morning session I (9:00-10:30)** | Going Bayesian in applied research: When, why, and how? |
+|  | Software solutions: An overview |
+|  | The Bayesian workflow |
+| **Morning session II (10:45-12:15)** | The brms package: Functionality |
+|  | Doing Bayesian data analysis with brms: A step-by-step walkthrough |
+| **Afternoon session (13:45-15:15)** | Group exercises |
+|  | Solutions and discussion |
+
+### Self-study
+
+1. Take-home exercise: Statistical programming in R
+1. Start your own data project with `brms`
+
+### Week 2
+
+| Session | Topics |
+| :------ | :----- |
+| **Day 3 (April 23) Statistical programming in R and Stan - An advanced introduction** |  |
+| **Morning session I (9:00-10:30)** | Programming in R: Review |
+|  | Generalized linear models |
+| **Morning session II (10:45-12:15)** | Stan: Programming language and documentation |
+|  | Programming and modeling in Stan: implementation, inference, and workflow |
+| **Afternoon session (13:45-15:15)** | Group exercises |
+|  | Solutions and discussion |
+| **Day 4 (April 24) Applied Bayesian modeling in Stan** |  |
+| **Morning session I (9:00-10:30)** | Programming and modeling in Stan: extensions |
+|  | Efficiency tuning |
+|  | Post-processing posterior draws |
+| **Morning session II (10:45-12:15)** | Choosing between pre-implemented and custom solutions |
+| **Afternoon session (13:45-15:15)** | Individual consultations |
 
 
 ## Using the workshop materials
