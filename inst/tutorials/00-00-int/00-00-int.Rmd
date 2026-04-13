@@ -203,6 +203,8 @@ learnr::run_tutorial("02-03-lab", package = "bayesianmodeling")
 
 ## Take home exercise ----
 learnr::run_tutorial("03-00-the", package = "bayesianmodeling")
+
+## More to follow in Week 2!
 ```
 
 ### Static course materials

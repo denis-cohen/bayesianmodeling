@@ -82,36 +82,45 @@ The workshop materials come as [`learnr`](https://rstudio.github.io/learnr/) tut
 
 
 ``` r
-# Detach if loaded
+# Package installation ----
+## Detach if loaded ----
 if ("bayesianmodeling" %in% (.packages())) {
   detach(package:bayesianmodeling, unload = TRUE)
 }
 
-# Uninstall if installed
+## Uninstall if installed ----
 if ("bayesianmodeling" %in% installed.packages()) {
   remove.packages("bayesianmodeling")
 }
 
-# Install if not installed
+## Install if not installed ----
 if (!("devtools" %in% installed.packages())) {
   install.packages("devtools")
 }
 
-# Load from GitHub
+## Load from GitHub ----
 library(devtools)
 devtools::install_github("denis-cohen/bayesianmodeling")
 
-# Load to library
+## Load to library ----
 library(bayesianmodeling)
 
-# Run tutorials (one at a time)
+# Run the tutorials (one at a time) ----
+## Introduction ----
 learnr::run_tutorial("00-00-int", package = "bayesianmodeling")
+
+## Day 1 ----
 learnr::run_tutorial("01-01-lec", package = "bayesianmodeling")
 learnr::run_tutorial("01-02-lec", package = "bayesianmodeling")
 learnr::run_tutorial("01-03-lab", package = "bayesianmodeling")
+
+## Day 2 ----
 learnr::run_tutorial("02-01-lec", package = "bayesianmodeling")
 learnr::run_tutorial("02-02-lec", package = "bayesianmodeling")
 learnr::run_tutorial("02-03-lab", package = "bayesianmodeling")
+
+## Take home exercise ----
+learnr::run_tutorial("03-00-the", package = "bayesianmodeling")
 ```
 
 ### Static workshop materials
