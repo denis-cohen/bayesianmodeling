@@ -1,10 +1,5 @@
----
-output:
-  rmarkdown::github_document
----
+# Bayesian Modeling: From Foundations to Custom Solutions
 
-Bayesian Modeling: From Foundations to Custom Solutions
-================
 Denis Cohen  
 <denis.cohen@uni-mannheim.de>
 
@@ -12,86 +7,308 @@ Denis Cohen
 
 ## Abstract
 
-Bayesian methods have become increasingly central to the social sciences and many adjacent fields. Once a niche methodology with steep computational and software entry barriers, Bayesian statistics is now a readily accessible toolbox available through user-friendly interfaces in R. Yet, despite the growing popularity of these methods, many researchers remain unsure when and why to use Bayesian approaches, how to interpret their results, and how to move beyond standard pre-implemented model types toward custom solutions.
- 
-This four-day workshop, spread across two weeks, provides an integrated path from foundations to custom applications of Bayesian modelling. The first half introduces participants to the core ideas and workflow of Bayesian statistics, juxtaposing Bayesian and frequentist perspectives, covering estimation, inference, and prediction, and demonstrating how to use the R package brms for applied Bayesian modelling with minimal coding effort. The second half then opens the black box: participants learn how to build their own Bayesian models in Stan, the probabilistic programming language underlying brms. Through a combination of conceptual input, guided lab sessions, and hands-on coding exercises, participants will gain both the theoretical grounding and practical skills to understand, use, and design Bayesian models for their own research questions---ranging from straightforward applications to fully custom model specifications.
- 
-By the end of the course, participants will be familiar with the Bayesian workflow, fluent in interpreting and diagnosing Bayesian models in R, and capable of implementing tailored modelling solutions in Stan that go beyond the limits of off-the-shelf packages.
+Bayesian methods have become increasingly central to the social sciences
+and many adjacent fields. Once a niche methodology with steep
+computational and software entry barriers, Bayesian statistics is now a
+readily accessible toolbox available through user-friendly interfaces in
+R. Yet, despite the growing popularity of these methods, many
+researchers remain unsure when and why to use Bayesian approaches, how
+to interpret their results, and how to move beyond standard
+pre-implemented model types toward custom solutions.
 
+This four-day workshop, spread across two weeks, provides an integrated
+path from foundations to custom applications of Bayesian modelling. The
+first half introduces participants to the core ideas and workflow of
+Bayesian statistics, juxtaposing Bayesian and frequentist perspectives,
+covering estimation, inference, and prediction, and demonstrating how to
+use the R package brms for applied Bayesian modelling with minimal
+coding effort. The second half then opens the black box: participants
+learn how to build their own Bayesian models in Stan, the probabilistic
+programming language underlying brms. Through a combination of
+conceptual input, guided lab sessions, and hands-on coding exercises,
+participants will gain both the theoretical grounding and practical
+skills to understand, use, and design Bayesian models for their own
+research questions—ranging from straightforward applications to fully
+custom model specifications.
+
+By the end of the course, participants will be familiar with the
+Bayesian workflow, fluent in interpreting and diagnosing Bayesian models
+in R, and capable of implementing tailored modelling solutions in Stan
+that go beyond the limits of off-the-shelf packages.
 
 ## Software Requirements
 
-This workshop requires installations of recent versions of [`R`](https://cran.r-project.org/mirrors.html), [`RStudio`](https://rstudio.com/products/rstudio/download/#download), as well as the packages [`rstan`](https://cran.r-project.org/web/packages/rstan/index.html), [`brms`](https://cran.r-project.org/web/packages/brms/index.html) (which depends on `rstan`), and [`marginaleffects`](https://cran.r-project.org/web/packages/marginaleffects/index.html).
+This workshop requires installations of recent versions of
+[`R`](https://cran.r-project.org/mirrors.html),
+[`RStudio`](https://rstudio.com/products/rstudio/download/#download), as
+well as the packages
+[`rstan`](https://cran.r-project.org/web/packages/rstan/index.html),
+[`brms`](https://cran.r-project.org/web/packages/brms/index.html) (which
+depends on `rstan`), and
+[`marginaleffects`](https://cran.r-project.org/web/packages/marginaleffects/index.html).
 
-Setting up `rstan` can be somewhat time-consuming as it requires the installation of a free-of-charge C++ compiler. Before the workshop, participants should follow [these
-instructions](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started) on the Stan Development Team's GitHub to install and configure the `rstan` package and its prerequisites on their operating system. If you do not have administrator privileges on your machine, please approach your system administrator in advance of the workshop. Should you encounter problems, feel free to send me an email.
+Setting up `rstan` can be somewhat time-consuming as it requires the
+installation of a free-of-charge C++ compiler. Before the workshop,
+participants should follow [these
+instructions](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started)
+on the Stan Development Team’s GitHub to install and configure the
+`rstan` package and its prerequisites on their operating system. If you
+do not have administrator privileges on your machine, please approach
+your system administrator in advance of the workshop. Should you
+encounter problems, feel free to send me an email.
 
 ## Course Structure
 
 ### Week 1
 
-| Session | Topics |
-| :------ | :----- |
-| **Day 1 (April 16): Bayesian and frequentist inference - A juxtaposition** |  |
-| **Morning session I (9:00-10:30)** | Introduction |
-|  | Refresher on R and frequentist inference |
-|  | Limitations of frequentist inference |
-| **Morning session II (10:45-12:15)** | Fundamental concepts in Bayesian inference |
-|  | Analytical Bayes |
-|  | Numerical Bayes via Markov-Chain Monte Carlo sampling |
-| **Afternoon session (13:45-15:15)** | Group exercises |
-|  | Solutions and discussion |
-| **Day 2 (April 17): Applied Bayesian statistics - A gentle introduction** |  |
-| **Morning session I (9:00-10:30)** | Going Bayesian in applied research: When, why, and how? |
-|  | Software solutions: An overview |
-|  | The Bayesian workflow |
-| **Morning session II (10:45-12:15)** | The brms package: Functionality |
-|  | Doing Bayesian data analysis with brms: A step-by-step walkthrough |
-| **Afternoon session (13:45-15:15)** | Group exercises |
-|  | Solutions and discussion |
+<table>
+<colgroup>
+<col style="width: 53%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Session</th>
+<th style="text-align: left;">Topics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Day 1 (April 16): Bayesian and
+frequentist inference - A juxtaposition</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Morning session I
+(9:00-10:30)</strong></td>
+<td style="text-align: left;">Introduction</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Refresher on R and frequentist
+inference</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Limitations of frequentist inference</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Morning session II
+(10:45-12:15)</strong></td>
+<td style="text-align: left;">Fundamental concepts in Bayesian
+inference</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Analytical Bayes</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Numerical Bayes via Markov-Chain Monte
+Carlo sampling</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Afternoon session
+(13:45-15:15)</strong></td>
+<td style="text-align: left;">Group exercises</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Solutions and discussion</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Day 2 (April 17): Applied Bayesian
+statistics - A gentle introduction</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Morning session I
+(9:00-10:30)</strong></td>
+<td style="text-align: left;">Going Bayesian in applied research: When,
+why, and how?</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Software solutions: An overview</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">The Bayesian workflow</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Morning session II
+(10:45-12:15)</strong></td>
+<td style="text-align: left;">The brms package: Functionality</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Doing Bayesian data analysis with brms: A
+step-by-step walkthrough</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Afternoon session
+(13:45-15:15)</strong></td>
+<td style="text-align: left;">Group exercises</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Solutions and discussion</td>
+</tr>
+</tbody>
+</table>
 
 ### Self-study
 
-1. Take-home exercise: Statistical programming in R
-1. Start your own data project with `brms`
+1.  Take-home exercise: Statistical programming in R
+2.  Start your own data project with `brms`
 
 ### Week 2
 
-| Session | Topics |
-| :------ | :----- |
-| **Day 3 (April 23) Statistical programming in R and Stan - An advanced introduction** |  |
-| **Morning session I (9:00-10:30)** | Programming in R: Review |
-|  | Generalized linear models |
-| **Morning session II (10:45-12:15)** | Stan: Programming language and documentation |
-|  | Programming and modeling in Stan: implementation, inference, and workflow |
-| **Afternoon session (13:45-15:15)** | Group exercises |
-|  | Solutions and discussion |
-| **Day 4 (April 24) Applied Bayesian modeling in Stan** |  |
-| **Morning session I (9:00-10:30)** | Programming and modeling in Stan: extensions |
-|  | Efficiency tuning |
-|  | Post-processing posterior draws |
-| **Morning session II (10:45-12:15)** | Choosing between pre-implemented and custom solutions |
-| **Afternoon session (13:45-15:15)** | Individual consultations |
-
+<table>
+<colgroup>
+<col style="width: 53%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Session</th>
+<th style="text-align: left;">Topics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Day 3 (April 23) Statistical
+programming in R and Stan - An advanced introduction</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Morning session I
+(9:00-10:30)</strong></td>
+<td style="text-align: left;">Programming in R: Review</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Generalized linear models</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Morning session II
+(10:45-12:15)</strong></td>
+<td style="text-align: left;">Stan: Programming language and
+documentation</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Programming and modeling in Stan:
+implementation, inference, and workflow</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Afternoon session
+(13:45-15:15)</strong></td>
+<td style="text-align: left;">Group exercises</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Solutions and discussion</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Day 4 (April 24) Applied Bayesian
+modeling in Stan</strong></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Morning session I
+(9:00-10:30)</strong></td>
+<td style="text-align: left;">Programming and modeling in Stan:
+extensions</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Efficiency tuning</td>
+</tr>
+<tr>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Post-processing posterior draws</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Morning session II
+(10:45-12:15)</strong></td>
+<td style="text-align: left;">Choosing between pre-implemented and
+custom solutions</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Afternoon session
+(13:45-15:15)</strong></td>
+<td style="text-align: left;">Individual consultations</td>
+</tr>
+</tbody>
+</table>
 
 ## Using the workshop materials
 
 ### Interactive workshop materials
 
-The workshop materials come as [`learnr`](https://rstudio.github.io/learnr/) tutorials wrapped in an R package. To download, install, and use the interactive materials, run the following code:
+The workshop materials come as
+[`learnr`](https://rstudio.github.io/learnr/) tutorials wrapped in an R
+package. To download, install, and use the interactive materials, run
+the following code:
 
+    # Package installation ----
+    ## Detach if loaded ----
+    if ("bayesianmodeling" %in% (.packages())) {
+      detach(package:bayesianmodeling, unload = TRUE)
+    }
 
+    ## Uninstall if installed ----
+    if ("bayesianmodeling" %in% installed.packages()) {
+      remove.packages("bayesianmodeling")
+    }
+
+    ## Install if not installed ----
+    if (!("devtools" %in% installed.packages())) {
+      install.packages("devtools")
+    }
+
+    ## Load from GitHub ----
+    library(devtools)
+    devtools::install_github("denis-cohen/bayesianmodeling")
+
+    ## Load to library ----
+    library(bayesianmodeling)
+
+    # Run the tutorials (one at a time) ----
+    ## Introduction ----
+    learnr::run_tutorial("00-00-int", package = "bayesianmodeling")
+
+    ## Day 1 ----
+    learnr::run_tutorial("01-01-lec", package = "bayesianmodeling")
+    learnr::run_tutorial("01-02-lec", package = "bayesianmodeling")
+    learnr::run_tutorial("01-03-lab", package = "bayesianmodeling")
+
+    ## Day 2 ----
+    learnr::run_tutorial("02-01-lec", package = "bayesianmodeling")
+    learnr::run_tutorial("02-02-lec", package = "bayesianmodeling")
+    learnr::run_tutorial("02-03-lab", package = "bayesianmodeling")
+
+    ## Take home exercise ----
+    learnr::run_tutorial("03-00-the", package = "bayesianmodeling")
 
 ### Static workshop materials
 
-- You can find HTML scripts of the **lecture slides** in the folder `lecture-materials`.
-- Likewise, you can find HTML scripts of the **lab exercises** in the folder `lab-materials`. These contains both exercises and solutions. If you prefer working on the exercises outside of the interactive `learnr` environment (i.e., in a regular R session), you can use the `Rmd` files supplied in the same folder.
+-   You can find HTML scripts of the **lecture slides** in the folder
+    `lecture-materials`.
+-   Likewise, you can find HTML scripts of the **lab exercises** in the
+    folder `lab-materials`. These contains both exercises and solutions.
+    If you prefer working on the exercises outside of the interactive
+    `learnr` environment (i.e., in a regular R session), you can use the
+    `Rmd` files supplied in the same folder.
 
 ## About the Instructor
 
-Denis Cohen is a Senior Research Fellow in the Data and Methods Unit at the [Mannheim Centre for European Social Research
+Denis Cohen is a Senior Research Fellow in the Data and Methods Unit at
+the [Mannheim Centre for European Social Research
 (MZES)](https://www.mzes.uni-mannheim.de/), [University of
-Mannheim](https://www.uni-mannheim.de/). He is also lead organizer of the [MZES
-Social Science Data
-Lab](https://www.mzes.uni-mannheim.de/socialsciencedatalab/page/events/) and lead editor of the blog [Methods
+Mannheim](https://www.uni-mannheim.de/). He is also lead organizer of
+the [MZES Social Science Data
+Lab](https://www.mzes.uni-mannheim.de/socialsciencedatalab/page/events/)
+and lead editor of the blog [Methods
 Bites](https://www.mzes.uni-mannheim.de/socialsciencedatalab/).
