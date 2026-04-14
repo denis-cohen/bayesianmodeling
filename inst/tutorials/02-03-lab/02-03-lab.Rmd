@@ -11,7 +11,7 @@ editor_options:
     wrap: 72
 ---
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
 ## --- Options ---
 eval_ex <- TRUE
 eval_sol <- TRUE
@@ -82,41 +82,6 @@ fold_sol <- function(text, title = "Solution") {
 - communicate results clearly and appropriately
 
 ## Logit model
-
-### The three parts of every GLM
-
-All generalized linear models have three characteristic parts:
-
-#### Family
-
--   The family stipulates a stochastic process that can plausibly generate an outcome $y$
--   This means we choose a pdf or pmf for $y$ given some parameters: $y_i \sim \text{f}(\theta_i, \psi)$
--   The choice usually depends on the distributional properties of $y$
-
-#### Linear component
-
--   A linear model $y_i^{\ast} = \mathbf{x}_i^{\prime} \beta + \epsilon_i$
--   The goal of inference is the estimation of $\beta$
--   From, this, we can derive our *systematic component* or *linear predictor*, $\eta_i = \mathbf{x}_i^{\prime} \beta$
-
-#### Inverse link function
-
--   A function that transforms the systematic component $\eta_i$ such that it represents a characteristic *parameter* $\theta_i$ of the family
--   $\theta_i = g^{-1}(\eta_i)$
-
-### The logit model
-
-The logit model is a popular model for binary outcomes.
-
--   Family: $$y_i \sim \text{Bernoulli}(\pi_i)$$
--   Linear component: $$y_i^{\ast} = \underbrace{\mathbf{x}_i^{\prime} \beta}_{\eta_i} + \underbrace{\epsilon_i}_{\sim \text{Logistic}(0, 1)}$$
--   Inverse link function: $$\pi_i = \frac{\exp(\eta_i)}{1 + \exp(\eta_i)}$$
-
-Thus, the logit model is given by
-
-$$y_i \sim \text{Bernoulli}\left(\frac{\exp(\eta_i)}{1 + \exp(\eta_i)}\right)$$
-
-where the $\beta$ vector is being estimated. Note that the parameters of the $\text{Logistic}(0, 1)$ error distribution are fixed and therefore need not be estimated.
 
 ### Context
 

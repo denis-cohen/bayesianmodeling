@@ -28,4 +28,6 @@ Imports:
     foreign,
     markdown,
     tibble
+Remotes:
+    denis-cohen/regplane3D
 RoxygenNote: 7.3.2
