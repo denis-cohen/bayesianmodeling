@@ -1,19 +1,46 @@
 ---
-title: "Take-Home Exercise"
-output:
+title: 'Take-home exercise: Programming in R'
+output: 
   learnr::tutorial:
     progressive: true
     allow_skip: true
     css: css/learnr-theme.css
 runtime: shiny_prerendered
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
+
+```{r, echo=FALSE}
+## --- Options ---
+eval_ex <- TRUE
+eval_sol <- TRUE
+eval_learnr <- TRUE
+
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE)
+
+## --- learnr ---
+if ("learnr" %in% (.packages()))
+  detach(package:learnr, unload = TRUE)
+library(learnr)
+```
+
+```{r, echo=FALSE, context="server"}
+## --- Options ---
+eval_ex <- TRUE
+eval_sol <- TRUE
+eval_learnr <- TRUE
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 
 ## ---- CRAN Packages ----
 ## Save package names as a vector of strings
-pkgs <-  c("dplyr", "MASS", "ggplot2", "ggpubr")
+pkgs <-  c("foreign",
+           "devtools",
+           "tibble")
 
 ## Install uninstalled packages
 lapply(pkgs[!(pkgs %in% installed.packages())],
@@ -22,4 +49,539 @@ lapply(pkgs[!(pkgs %in% installed.packages())],
 
 ## Load all packages to library and adjust options
 lapply(pkgs, library, character.only = TRUE)
+
+## ---- GitHub Packages ----
+devtools::install_github("denis-cohen/regplane3D")
+library(regplane3D)
+
+## ---- Global learnr Objects ----
+gles <- 
+  read.dta("https://github.com/denis-cohen/statmodeling/raw/main/data/gles.dta")
+
+y <- gles$sup_afd
+X <- model.matrix(~ se_self + la_self + se_self:la_self, data = gles)
 ```
+
+## Learning Goals
+
+- strengthen programming skills for statistical work
+- work confidently with objects, functions, and control flow
+- prepare for further programming and modeling in Stan
+
+## Linear Algebra Basics in R
+
+Scalars, vectors, and matrices are frequently used objects in linear algebra.
+
+Unfortunately, they do not translate straightforwardly into numeric R objects.
+
+### Scalars
+
+A scalar is a single numeric element (e.g., an integer or a real number).
+
+R does **not** have an object type for scalars. Scalars are stored as numeric vectors of length 1.
+
+```{r scalar-1, exercise=TRUE, eval=eval_ex}
+x <- 1.5
+class(x)
+typeof(x)
+is.vector(x)
+length(x)
+```
+
+Of course, it is not that easy. In math, the inner product of two vectors returns a scalar:
+
+$$s = \mathbf{a}^{\prime} \mathbf{b} = \begin{bmatrix} 0.5 & 1 & 1.5\end{bmatrix} \begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix} = 0.5 \times 1 + 1 \times 2 + 1.5 \times 3 = 7$$
+
+In R, however,...
+
+```{r scalar-2, exercise=TRUE, eval=eval_ex}
+a <- c(0.5, 1, 1.5)
+b <- c(1, 2, 3)
+
+s <- t(a) %*% b
+s
+
+class(s)
+typeof(s)
+is.vector(s)
+is.matrix(s)
+dim(s)
+```
+
+...`s` will be stored as a matrix of dimensions $1 \times 1$. This can be annoying, because it prevents you from using `s` for simple tasks like scalar multiplication:
+
+$$ 7 \begin{bmatrix} 1 & 3 \\ 2 & 4\end{bmatrix} = \begin{bmatrix} 7 & 21 \\ 14 & 28\end{bmatrix}$$
+
+```{r scalar-3, exercise=TRUE, eval=eval_ex,, error=TRUE}
+m <- matrix(1:4, nrow = 2, ncol = 2)
+s * m
+```
+
+So, to make this work, we need to store `s` as object type `vector` to ensure it behaves like a scalar:
+
+```{r scalar-4, exercise=TRUE, eval=eval_ex}
+m <- matrix(1:4, nrow = 2, ncol = 2)
+s <- as.vector(s)
+s * m
+```
+
+
+### Vectors
+
+Whereas the mathematical concept of a scalar is stored as a `vector` object in R, the mathematical concept of a vector *sometimes* requires the object type `matrix`.
+
+We usually distinguish row and column vectors in linear algebra. Row vectors are matrices of dimensions $1 \times K$ whereas column vectors are matrices of dimensions $K \times 1$.
+
+In R, vectors are just serial listings, without fixed dimensions. R will *mostly*
+treat numeric `vector` objects like column vectors. Yet sometimes, when (pre-)multiplying other vectors or matrices, R will  automatically transpose the vector on the left to ensure conformability:
+
+```{r vector-1, exercise=TRUE, eval=eval_ex}
+t(a) %*% b
+a %*% b
+```
+
+So, `a %*% b`, same as the more literal `t(a) %*% b`, yields the inner product $\mathbf{a}^{\prime} \mathbf{b}$.
+
+To get the outer product $\mathbf{a}\mathbf{b}^{\prime}$, which results in a matrix of dimensions $3 \times 3$, you can do the following:
+
+```{r vector-2, exercise=TRUE, eval=eval_ex}
+a %*% t(b)
+```
+
+You can ensure unambiguous dimensions by defining vectors as matrices:
+
+```{r vector-3, exercise=TRUE, eval=eval_ex}
+# A column vector
+a <- as.matrix(a)
+a
+
+# A row vector
+a_prime <- t(as.matrix(a))
+a_prime
+```
+
+### Summary
+
+In R:
+
+- Scalars are vectors, and sometimes matrices.
+- Vectors are column vectors, but sometimes act like row vectors, and can be defined as matrices.
+- Matrices are, in fact, matrices.
+
+Why is this important?
+
+- Stan's programming language does not allow for these imprecisions
+- We will therefore need to be mindful about the *actual* classes and dimensions of our objects and about how we pass R generated data to Stan.
+
+
+## Implementing OLS in R
+
+We have all used the ordinary least squares estimator for linear regression.
+But have you ever implemented it from scratch? This will be your task for this exercise!
+
+Note that we will not *derive* the OLS estimator by hand. Instead, you will get the derivation and translate it into R code.
+
+
+### The linear model
+
+The OLS estimator for linear regression requires calculations in matrix form. 
+
+### Model specification:
+
+Likelihood:
+$$\mathbf{y}_i \sim \text{N}(\mu_i, \sigma^2) \text{ for all }i = 1,...N$$
+
+Systematic component:
+$$\mu_i = \mathbf{x}_i^{\prime} \beta  \text{ for all }i = 1,...N$$
+
+### Four ways to denote the linear model formula
+
+1. Scalar form: $$y_i = \beta_1 x_{i1} + \beta_2 x_{i2} + \beta_3 x_{i3} + \epsilon_i \text{ for all } i=1,...,N$$
+2. Row-vector form: $$y_i = \mathbf{x_i^{\prime}} \mathbf{\beta} + \epsilon_i  \text{ for all } i=1,...,N$$
+3. Column-vector form: $$\mathbf{y} = \beta_1 \mathbf{x_{1}} + \beta_2 \mathbf{x_{2}} + \beta_3 \mathbf{x_{3}} + \mathbf{\epsilon}$$
+4. Matrix form: $$\mathbf{y = X \beta + \epsilon}$$
+
+### What the matrix-form looks like in detail
+
+$$
+\underbrace{\begin{bmatrix} y_1 \\ \vdots \\  y_{N} \end{bmatrix}}_{N \times 1}
+		=
+		\underbrace{\begin{bmatrix}
+		1 			& x_{1, 2}	 & \cdots &  x_{1, K} \\ 
+		\vdots 		& \vdots  	 & \ddots &  \vdots \\
+		1 			& x_{N, 2}    & \cdots & x_{N, K}
+		\end{bmatrix}}_{N \times K}
+		\underbrace{\begin{bmatrix} \beta_1 \\ \beta_2 \\ \vdots \\ \beta_K \end{bmatrix}}_{K \times 1}
+		+ 
+	\underbrace{\begin{bmatrix} \epsilon_1 \\ \vdots \\ \epsilon_{N} \end{bmatrix}}_{N \times 1}
+$$
+
+### The matrix form is 100% equivalent to the other three forms
+
+$$
+\underbrace{\begin{bmatrix} y_1 \\ \vdots \\  y_{N} \end{bmatrix}}_{N \times 1}
+	=
+	\underbrace{\begin{bmatrix}
+	\beta_1 \cdot 1	+ \beta_2 \cdot x_{1, 2} + \cdots + \beta_K \cdot x_{1, K} \\
+	\vdots \\
+	\beta_1 \cdot 1	+ \beta_2 \cdot x_{N, 2} + \cdots + \beta_K \cdot x_{N, K} \\
+	\end{bmatrix}}_{N \times 1}
+	+ 
+	\underbrace{\begin{bmatrix} \epsilon_1 \\ \vdots \\ \epsilon_{N} \end{bmatrix}}_{N \times 1}
+$$
+	
+### Inputs (data)
+
+1. A length-$N$ outcome vector $\mathbf{y}$
+1. An $N \times K$ model matrix $\mathbf{X}$, which contains a leading column of 1's to multiply the intercept
+
+### Primary outputs (estimands, parameters)
+
+1. A length-$K$ coefficient vector $\beta$
+1. A real, strictly positive variance parameter $\sigma^2$
+
+### Secondary outputs (transformed parameters)
+
+With estimates $\hat{\beta}$ and $\hat{\sigma}^2$, we can directly calculate the variance-covariance matrix of the coefficients, $\hat{\mathbf{\Sigma}}$. This variance-covariance matrix gives us the parameters that define the joint multivariate normal *sampling distribution* of our coefficients:
+$$
+\hat{\beta} \sim \text{MVN}(\hat{\beta}, \hat{\mathbf{\Sigma}})
+$$
+
+Some things to note:
+
+- The diagonal of this matrix holds the *variances* of our coefficients.
+- The square root of these variances gives us their *standard errors*.
+- The off-diagonals give us the *covariances* of any pair of coefficients.
+- The variance-covariance matrix is of dimensions $K \times K$.
+- The variance-covariance matrix is *symmetrical*; thus $\Sigma_{a,b} = \Sigma_{b, a}$ for any $a, b \in \{1,...,K\}$.
+
+
+## Data preparation
+
+### Context
+
+The exercise chunk has pre-loaded the data frame `gles`, which contains three variables from the 2017 German Longitudinal Election Study. We want to model respondents' support for the AfD (`sup_afd`, measured on an 11-point scale ranging from -5 to 5) as a function of respondents' pro-redistribution preferences (`se_self`) and anti-immigration preferences (`la_self`), including a multiplicative interaction term for the two predictors (`se_self:la_self`). 
+
+Both `se_self` and `la_self` are measured on 11-point scales:
+
+- `se_self` ranges from values (0) "less taxes and deductions, even if that means less social spending" to (10) "more social spending, even if that means more taxes and deductions". 
+- `la_self` ranges from values (0) "facilitate immigration" to (10) "restrict immigration".
+
+The model formula is given by
+$$\mathtt{sup\_afd} = \beta_1 + \beta_2 \mathtt{se\_self} + \beta_3 \mathtt{la\_self} + \beta_4 \mathtt{se\_self \times la\_self} + \epsilon$$
+
+### Prompt
+
+The task is simple: We need the vector $\mathbf{y}$ and the matrix $\mathbf{X}$
+
+Hints:
+
+- You can extract any column from a data frame using the `$` operator.
+- Check out `model.matrix()`, which takes the right-hand of a model formula as input and returns a complete model matrix.
+
+
+```{r data-prep, exercise=TRUE, eval=eval_ex}
+y <- ...
+X <- ...
+```
+
+```{r data-prep-solution, eval=eval_sol, echo=eval_sol}
+y <- gles$sup_afd
+X <- model.matrix(~ se_self + la_self + se_self:la_self, data = gles)
+```
+
+## Estimation
+
+### The coefficient vector
+
+You have probably seen this before: The OLS estimator for $\beta$ is given by 
+
+$$
+\hat{\beta} = \mathbf{(X^{\prime}X)^{-1}X^{\prime}y}
+$$
+
+Let's translate this into R! Hints:
+
+- `t()` transposes matrices/vectors
+- `solve()` inverts matrices
+- `%*%` multiplies matrices/vectors
+
+
+```{r coef-est, exercise=TRUE, eval=eval_ex}
+b <- ...
+```
+
+```{r coef-est-solution, eval=eval_sol, echo=eval_sol}
+b <- solve(t(X) %*% X) %*% t(X) %*% y
+```
+
+### The variance parameter
+
+The estimator for the variance parameter $\sigma^2$ is
+$$\hat{\sigma}^2 = \frac{\mathbf{e}^{\prime}\mathbf{e}}{N-K}$$
+
+Here, $\mathbf{e}$ is a length-$N$ vector of residuals, where $\mathbf{e} = \mathbf{y} - \mathbf{X}\beta$, which is the same as $\mathbf{e} = \mathbf{y} - \hat{\mathbf{y}}$.
+
+For this task, first calculate $\mathbf{e}$. Then, calculate $\hat{\sigma}^2$. After this, you can calculate the variance-covariance matrix, which is given by
+$$\hat{\mathbf{\Sigma}} = \hat{\sigma}^2 \mathbf{(X^{\prime}X)^{-1}} $$
+
+Hints:
+
+- Remember that X is of dimensions $N \times K$. Try `dim()`, `nrow()`, and `ncol`.
+- Check the structure (`str()`) of `e`.
+- Check the `class()` of `sigma2`. You want it to be of a vector of class `numeric`.
+
+```{r sigma-est-setup}
+b <- solve(t(X) %*% X) %*% t(X) %*% y
+```
+
+```{r sigma-est, exercise=TRUE, eval=eval_ex,, exercise.setup="sigma-est-setup"}
+e <- ...
+N <- ...
+K <- ...
+sigma2 <- ...
+Sigma <- ...
+```
+
+```{r sigma-est-solution, eval=eval_sol, echo=eval_sol}
+e <- y - X %*% b
+N <- nrow(X)
+K <- ncol(X)
+sigma2 <- t(e) %*% e / (N - K)
+Sigma <- as.vector(sigma2) * solve(t(X) %*% X)
+```
+
+### A basic regression table
+
+With $\hat{\beta}$ and $\hat{\mathbf{\Sigma}}$, we can calculate the standard errors of our coefficients, which are given by the square root of the diagonal of $\hat{\mathbf{\Sigma}}$.
+
+Using these, we can also calculate 95% confidence intervals for our coefficients, which are given by $\hat{\beta} + \Phi^{-1}(0.025) \cdot \text{SE}(\hat{\beta})$ and $\hat{\beta} + \Phi^{-1}(0.975) \cdot \text{SE}(\hat{\beta})$. Here $\Phi^{-1}$ is the quantile function of the standard normal distribution, which you can calculate with `qnorm()`.
+
+```{r reg-table-setup}
+b <- solve(t(X) %*% X) %*% t(X) %*% y
+e <- y - X %*% b
+N <- nrow(X)
+K <- ncol(X)
+sigma2 <- t(e) %*% e / (N - K)
+Sigma <- as.vector(sigma2) * solve(t(X) %*% X)
+```
+
+```{r reg-table, exercise=TRUE, eval=eval_ex,, exercise.setup="reg-table-setup"}
+tibble::tibble(
+  term = c("Intercept", "se_self", "la_self", "se_self:la_self"),
+  estimate = ...,
+  std_error = ...,
+  conf_low = ...,
+  conf_high = ...
+)
+```
+
+```{r reg-table-solution, eval=eval_sol, echo=eval_sol}
+tibble::tibble(
+  term = c("Intercept", "se_self", "la_self", "se_self:la_self"),
+  estimate = as.vector(b),
+  std_error = sqrt(diag(Sigma)),
+  conf_low = estimate + qnorm(.025) * std_error,
+  conf_high = estimate + qnorm(.975) * std_error
+)
+```
+
+### Validation
+
+Let's check if we got everything right!
+
+Estimate the model via `lm()` and extract the coefficient vector and the variance-covariance matrix of the coefficients.
+
+Then, use `all.equal()` with the option `check.attributes = FALSE` to check if our estimates differ from those generated via `lm()`.
+Note that you must supply identical object types, so convert `b` to a `vector`.
+
+```{r valid-1-setup}
+b <- solve(t(X) %*% X) %*% t(X) %*% y
+e <- y - X %*% b
+N <- nrow(X)
+K <- ncol(X)
+sigma2 <- t(e) %*% e / (N - K)
+Sigma <- as.vector(sigma2) * solve(t(X) %*% X)
+```
+
+```{r valid-1, exercise=TRUE, eval=eval_ex,, exercise.setup="valid-1-setup"}
+
+```
+
+```{r valid-1-solution, eval=eval_sol, echo=eval_sol}
+# Estimate model
+est_lm <- lm(sup_afd ~ se_self + la_self + se_self:la_self, data = gles)
+
+# Extract b and Sigma
+b_lm <- coef(est_lm)
+Sigma_lm <- vcov(est_lm)
+
+# Check for equality (with minor tolerance)
+all.equal(as.vector(b), b_lm, check.attributes = FALSE)
+all.equal(Sigma, Sigma_lm, check.attributes = FALSE)
+```
+
+## Bonus: Processing (prediction)
+
+With $\hat\beta$ and $\hat{\mathbf{\Sigma}}$, we have knowledge of the full sampling distribution for $\hat\beta$. This allows us to also get confidence intervals for any post-estimation quantities of interest that are functions of parameters and data.
+
+We are going to focus on *expected values*: $\mathbb{E}[y|\mathbf{\mathbf{x}^{\ast}}] = \mathbf{x}^{\ast\prime}\hat\beta$. The vector $\mathbf{x}^{\ast}$ can contain any (reasonable) scenario of covariate values. Here, we want to calculate expected values over the full grid of values of `se_self` and `la_self`.
+
+How can we get its standard error? In OLS models, the variance of an expected value is given by 
+
+$$\mathbf{x}^{\ast \prime} \hat{\mathbf{\Sigma}} \mathbf{x}^{\ast}$$
+
+Its square root gives the standard error.
+
+### Step 1: Define value sequences for the predictors
+
+Remember that both predictors are measured on 11-point scales ranging from 0 to 10. But that shouldn't stop us from calculating at finer gradations of the two scales. Define value sequences ranging from 0 to 10 in steps of 0.25 for both predictors (Hint: `seq()`) and store them in the vectors below.
+
+```{r proc1-1-setup}
+b <- solve(t(X) %*% X) %*% t(X) %*% y
+e <- y - X %*% b
+N <- nrow(X)
+K <- ncol(X)
+sigma2 <- t(e) %*% e / (N - K)
+Sigma <- as.vector(sigma2) * solve(t(X) %*% X)
+```
+
+```{r proc1-1, exercise=TRUE, eval=eval_ex,, exercise.setup="proc1-1-setup"}
+se_vals <- ...
+la_vals <- ...
+```
+
+```{r proc1-1-solution, eval=eval_sol, echo=eval_sol}
+se_vals <- seq(0, 10, .25)
+la_vals <- seq(0, 10, .25)
+```
+
+### Step 2: Initialize a container
+
+Before we start, let's be clear what we want eventually: For every value combination of `se_vals` and `la_vals`, we want three estimates:
+
+1. The point estimate of the expected value, $\mathbf{x}^{\ast \prime} \hat \beta$
+1. The lower bound of its confidence interval, $\mathbf{x}^{\ast \prime} \hat \beta + \Phi^{-1}(0.025) \sqrt{\mathbf{x}^{\ast \prime}\hat{\mathbf{\Sigma}} \mathbf{x}^{\ast}}$
+1. The upper bound of its confidence interval, $\mathbf{x}^{\ast \prime} \hat \beta + \Phi^{-1}(0.975) \sqrt{\mathbf{x}^{\ast \prime}\hat{\mathbf{\Sigma}} \mathbf{x}^{\ast}}$
+
+So our container must accommodate `length(se_vals) * length(la_vals) * 3L = 5043L` values.
+
+We could, of course, store these in a vector of length 5043. Or in three matrices of dimensions $41 \times 41$, which we could subsequently wrap in a list. Let's go for the most convenient solution, though: A three-dimensional `array` of dimensions `dim = c(length(se_vals), length(la_vals), 3L)`. Let's initialize this object with `NA`s.
+
+```{r proc2-1-setup}
+se_vals <- seq(0, 10, .25)
+la_vals <- seq(0, 10, .25)
+```
+
+```{r proc2-1, exercise=TRUE, eval=eval_ex,, exercise.setup="proc2-1-setup"}
+pred <- ...
+```
+
+```{r proc2-1-solution, eval=eval_sol, echo=eval_sol}
+pred <- array(NA, dim = c(length(se_vals), length(la_vals), 3L))
+```
+
+### Step 3: Use a nested loop to fill the container
+
+Hints:
+
+- Your outer loop should loop through the elements of `se_vals` (see `seq_along()`).
+- Your inner loop should loop through the elements of `la_vals` (see `seq_along()`).
+- Define (overwrite) the vector `x_star` at each iteration of the loop. Remember that our model matrix has four columns -- you will need a corresponding vector element in `x_star`:
+    1. a 1 to multiply the intercept
+    1. the $i^{\text{th}}$ value of `se_self`
+    1. the $j^{\text{th}}$ value of `la_self`
+    1. the product of the $i^{\text{th}}$ value of `se_self` and the $j^{\text{th}}$ value of `la_self`
+- Define (overwrite) the vector `std_error` at each iteration of the loop. Remember: You want this to be a *scalar*!
+
+```{r proc3-1-setup}
+b <- solve(t(X) %*% X) %*% t(X) %*% y
+e <- y - X %*% b
+N <- nrow(X)
+K <- ncol(X)
+sigma2 <- t(e) %*% e / (N - K)
+Sigma <- as.vector(sigma2) * solve(t(X) %*% X)
+se_vals <- seq(0, 10, .25)
+la_vals <- seq(0, 10, .25)
+pred <- array(NA, dim = c(length(se_vals), length(la_vals), 3L))
+```
+    
+```{r proc3-1, exercise=TRUE, eval=eval_ex,, exercise.setup="proc3-1-setup"}
+for (i in ...) {
+  for (j in ...) {
+    x_star <- c(...)
+    std_err <- ...
+    pred[i, j, 1] <- ...
+    pred[i, j, 2] <- pred[i, j, 1] + ...
+    pred[i, j, 3] <- pred[i, j, 1] + ...
+  }
+}
+```
+
+```{r proc3-1-solution, eval=eval_sol, echo=eval_sol}
+for (i in seq_along(se_vals)) {
+  for (j in seq_along(la_vals)) {
+    x_star <- c(1, se_vals[i], la_vals[j], se_vals[i] * la_vals[j])
+    std_err <- sqrt(as.vector(t(x_star) %*% Sigma %*% x_star))
+    pred[i, j, 1] <- x_star %*% b
+    pred[i, j, 2] <- pred[i, j, 1] + qnorm(.025) * std_err
+    pred[i, j, 3] <- pred[i, j, 1] + qnorm(.975) * std_err
+  }
+}
+```
+
+
+## Visualization
+
+Time for some shameless self-promotion: We are going to use my `regplane3D` package to visualize the expected values of AfD support as a joint function of socio-economic and immigration preferences.
+
+These plots generalize two-dimensional plots that show expected values/predictions as a line that varies with one predictor to three dimensions, where the expected values/predictions are shown as a plane that varies with two predictors. You can find additional information [here](https://socialsciencedatalab.mzes.uni-mannheim.de/article/regplane3d/).
+
+```{r viz-1, echo = T, eval = F}
+regplane3D::plane3D(
+  z = pred,
+  x = se_vals,
+  y = la_vals,
+  main = "Expected AfD Support \n by Redistribution and Immigration Preferences",
+  zlab = "Support AfD",
+  xlab = "Pro-Redistribution",
+  ylab = "Anti-Immigration",
+  xnlines = 6L,
+  ynlines = 6L
+)
+```
+
+```{r viz, fig.align='center', fig.width = 9, fig.height=6}
+b <- solve(t(X) %*% X) %*% t(X) %*% y
+e <- y - X %*% b
+N <- nrow(X)
+K <- ncol(X)
+sigma2 <- t(e) %*% e / (N - K)
+Sigma <- as.vector(sigma2) * solve(t(X) %*% X)
+se_vals <- seq(0, 10, .25)
+la_vals <- seq(0, 10, .25)
+pred <- array(NA, dim = c(length(se_vals), length(la_vals), 3L))
+for (i in seq_along(se_vals)) {
+  for (j in seq_along(la_vals)) {
+    x_star <- c(1, se_vals[i], la_vals[j], se_vals[i] * la_vals[j])
+    std_err <- sqrt(as.vector(t(x_star) %*% Sigma %*% x_star))
+    pred[i, j, 1] <- x_star %*% b
+    pred[i, j, 2] <- pred[i, j, 1] + qnorm(.025) * std_err
+    pred[i, j, 3] <- pred[i, j, 1] + qnorm(.975) * std_err
+  }
+}
+regplane3D::plane3D(
+  z = pred,
+  x = se_vals,
+  y = la_vals,
+  main = "Expected AfD Support \n by Redistribution and Immigration Preferences",
+  zlab = "Support AfD",
+  xlab = "Pro-Redistribution",
+  ylab = "Anti-Immigration",
+  xnlines = 6L,
+  ynlines = 6L
+)
+```
+
+So, which substantive conclusions can we draw?
+

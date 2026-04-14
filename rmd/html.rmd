@@ -1,11 +1,16 @@
 ---
 title: "`r params$title`"
-sbutitle: "(without solutions)"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
 ---
 
 ```{r, echo=FALSE}
 eval_ex <- TRUE
 eval_sol <- FALSE
+eval_learnr <- TRUE
 
 knitr::opts_chunk$set(message = FALSE,
                       warning = FALSE)

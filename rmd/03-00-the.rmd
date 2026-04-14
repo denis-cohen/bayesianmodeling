@@ -4,7 +4,8 @@ knitr::opts_chunk$set(echo = FALSE)
 ## ---- CRAN Packages ----
 ## Save package names as a vector of strings
 pkgs <-  c("foreign",
-           "devtools")
+           "devtools",
+           "tibble")
 
 ## Install uninstalled packages
 lapply(pkgs[!(pkgs %in% installed.packages())],
@@ -13,9 +14,24 @@ lapply(pkgs[!(pkgs %in% installed.packages())],
 
 ## Load all packages to library and adjust options
 lapply(pkgs, library, character.only = TRUE)
+
+## ---- GitHub Packages ----
+devtools::install_github("denis-cohen/regplane3D")
+library(regplane3D)
+
+## ---- Global learnr Objects ----
+gles <- 
+  read.dta("https://github.com/denis-cohen/statmodeling/raw/main/data/gles.dta")
+
+y <- gles$sup_afd
+X <- model.matrix(~ se_self + la_self + se_self:la_self, data = gles)
 ```
 
-## Learning
+## Learning Goals
+
+- strengthen programming skills for statistical work
+- work confidently with objects, functions, and control flow
+- prepare for further programming and modeling in Stan
 
 ## Linear Algebra Basics in R
 
@@ -29,7 +45,7 @@ A scalar is a single numeric element (e.g., an integer or a real number).
 
 R does **not** have an object type for scalars. Scalars are stored as numeric vectors of length 1.
 
-```{r scalar-1, exercise = TRUE}
+```{r scalar-1, exercise=TRUE, eval=eval_ex}
 x <- 1.5
 class(x)
 typeof(x)
@@ -43,7 +59,7 @@ $$s = \mathbf{a}^{\prime} \mathbf{b} = \begin{bmatrix} 0.5 & 1 & 1.5\end{bmatrix
 
 In R, however,...
 
-```{r scalar-2, exercise = TRUE}
+```{r scalar-2, exercise=TRUE, eval=eval_ex}
 a <- c(0.5, 1, 1.5)
 b <- c(1, 2, 3)
 
@@ -61,14 +77,14 @@ dim(s)
 
 $$ 7 \begin{bmatrix} 1 & 3 \\ 2 & 4\end{bmatrix} = \begin{bmatrix} 7 & 21 \\ 14 & 28\end{bmatrix}$$
 
-```{r scalar-3, exercise = TRUE}
+```{r scalar-3, exercise=TRUE, eval=eval_ex,, error=TRUE}
 m <- matrix(1:4, nrow = 2, ncol = 2)
 s * m
 ```
 
 So, to make this work, we need to store `s` as object type `vector` to ensure it behaves like a scalar:
 
-```{r scalar-4, exercise = TRUE}
+```{r scalar-4, exercise=TRUE, eval=eval_ex}
 m <- matrix(1:4, nrow = 2, ncol = 2)
 s <- as.vector(s)
 s * m
@@ -84,22 +100,22 @@ We usually distinguish row and column vectors in linear algebra. Row vectors are
 In R, vectors are just serial listings, without fixed dimensions. R will *mostly*
 treat numeric `vector` objects like column vectors. Yet sometimes, when (pre-)multiplying other vectors or matrices, R will  automatically transpose the vector on the left to ensure conformability:
 
-```{r vector-1, exercise = TRUE}
+```{r vector-1, exercise=TRUE, eval=eval_ex}
 t(a) %*% b
 a %*% b
 ```
 
-So `a %*% b`, same as the more literal `t(a) %*% b`, yields the inner product $\mathbf{a}^{\prime} \mathbf{b}$.
+So, `a %*% b`, same as the more literal `t(a) %*% b`, yields the inner product $\mathbf{a}^{\prime} \mathbf{b}$.
 
 To get the outer product $\mathbf{a}\mathbf{b}^{\prime}$, which results in a matrix of dimensions $3 \times 3$, you can do the following:
 
-```{r vector-2, exercise = TRUE}
+```{r vector-2, exercise=TRUE, eval=eval_ex}
 a %*% t(b)
 ```
 
 You can ensure unambiguous dimensions by defining vectors as matrices:
 
-```{r vector-3, exercise=TRUE}
+```{r vector-3, exercise=TRUE, eval=eval_ex}
 # A column vector
 a <- as.matrix(a)
 a
@@ -122,19 +138,16 @@ Why is this important?
 - Stan's programming language does not allow for these imprecisions
 - We will therefore need to be mindful about the *actual* classes and dimensions of our objects and about how we pass R generated data to Stan.
 
-## Encoding OLS in R
+
+## Implementing OLS in R
 
 We have all used the ordinary least squares estimator for linear regression.
-But have you ever implemented it by hand? This will be your task for this exercise!
-
-At the same time, this exercise will be a segue into Session 2 of our workshop, which focuses on generalized linear models.
+But have you ever implemented it from scratch? This will be your task for this exercise!
 
 Note that we will not *derive* the OLS estimator by hand. Instead, you will get the derivation and translate it into R code.
 
 
 ### The linear model
-
-The linear model is a special case of generalized linear models (more on this in a sec).
 
 The OLS estimator for linear regression requires calculations in matrix form. 
 
@@ -146,7 +159,7 @@ $$\mathbf{y}_i \sim \text{N}(\mu_i, \sigma^2) \text{ for all }i = 1,...N$$
 Systematic component:
 $$\mu_i = \mathbf{x}_i^{\prime} \beta  \text{ for all }i = 1,...N$$
 
-### Four way to denote the linear model formula
+### Four ways to denote the linear model formula
 
 1. Scalar form: $$y_i = \beta_1 x_{i1} + \beta_2 x_{i2} + \beta_3 x_{i3} + \epsilon_i \text{ for all } i=1,...,N$$
 2. Row-vector form: $$y_i = \mathbf{x_i^{\prime}} \mathbf{\beta} + \epsilon_i  \text{ for all } i=1,...,N$$
@@ -155,7 +168,8 @@ $$\mu_i = \mathbf{x}_i^{\prime} \beta  \text{ for all }i = 1,...N$$
 
 ### What the matrix-form looks like in detail
 
-$$\underbrace{\begin{bmatrix} y_1 \\ \vdots \\  y_{N} \end{bmatrix}}_{N \times 1}
+$$
+\underbrace{\begin{bmatrix} y_1 \\ \vdots \\  y_{N} \end{bmatrix}}_{N \times 1}
 		=
 		\underbrace{\begin{bmatrix}
 		1 			& x_{1, 2}	 & \cdots &  x_{1, K} \\ 
@@ -164,11 +178,13 @@ $$\underbrace{\begin{bmatrix} y_1 \\ \vdots \\  y_{N} \end{bmatrix}}_{N \times 1
 		\end{bmatrix}}_{N \times K}
 		\underbrace{\begin{bmatrix} \beta_1 \\ \beta_2 \\ \vdots \\ \beta_K \end{bmatrix}}_{K \times 1}
 		+ 
-	\underbrace{\begin{bmatrix} \epsilon_1 \\ \vdots \\ \epsilon_{N} \end{bmatrix}}_{N \times 1}$$
+	\underbrace{\begin{bmatrix} \epsilon_1 \\ \vdots \\ \epsilon_{N} \end{bmatrix}}_{N \times 1}
+$$
 
 ### The matrix form is 100% equivalent to the other three forms
 
-$$\underbrace{\begin{bmatrix} y_1 \\ \vdots \\  y_{N} \end{bmatrix}}_{N \times 1}
+$$
+\underbrace{\begin{bmatrix} y_1 \\ \vdots \\  y_{N} \end{bmatrix}}_{N \times 1}
 	=
 	\underbrace{\begin{bmatrix}
 	\beta_1 \cdot 1	+ \beta_2 \cdot x_{1, 2} + \cdots + \beta_K \cdot x_{1, K} \\
@@ -176,7 +192,8 @@ $$\underbrace{\begin{bmatrix} y_1 \\ \vdots \\  y_{N} \end{bmatrix}}_{N \times 1
 	\beta_1 \cdot 1	+ \beta_2 \cdot x_{N, 2} + \cdots + \beta_K \cdot x_{N, K} \\
 	\end{bmatrix}}_{N \times 1}
 	+ 
-	\underbrace{\begin{bmatrix} \epsilon_1 \\ \vdots \\ \epsilon_{N} \end{bmatrix}}_{N \times 1}$$
+	\underbrace{\begin{bmatrix} \epsilon_1 \\ \vdots \\ \epsilon_{N} \end{bmatrix}}_{N \times 1}
+$$
 	
 ### Inputs (data)
 
@@ -191,7 +208,10 @@ $$\underbrace{\begin{bmatrix} y_1 \\ \vdots \\  y_{N} \end{bmatrix}}_{N \times 1
 ### Secondary outputs (transformed parameters)
 
 With estimates $\hat{\beta}$ and $\hat{\sigma}^2$, we can directly calculate the variance-covariance matrix of the coefficients, $\hat{\mathbf{\Sigma}}$. This variance-covariance matrix gives us the parameters that define the joint multivariate normal *sampling distribution* of our coefficients:
-$$\hat{\beta} \sim \text{MVN}(\hat{\beta}, \hat{\mathbf{\Sigma}})$$
+$$
+\hat{\beta} \sim \text{MVN}(\hat{\beta}, \hat{\mathbf{\Sigma}})
+$$
+
 Some things to note:
 
 - The diagonal of this matrix holds the *variances* of our coefficients.
@@ -225,12 +245,12 @@ Hints:
 - Check out `model.matrix()`, which takes the right-hand of a model formula as input and returns a complete model matrix.
 
 
-```{r data-prep, exercise=TRUE}
+```{r data-prep, exercise=TRUE, eval=eval_ex}
 y <- ...
 X <- ...
 ```
 
-```{r data-prep-solution}
+```{r data-prep-solution, eval=eval_sol, echo=eval_sol}
 y <- gles$sup_afd
 X <- model.matrix(~ se_self + la_self + se_self:la_self, data = gles)
 ```
@@ -239,20 +259,24 @@ X <- model.matrix(~ se_self + la_self + se_self:la_self, data = gles)
 
 ### The coefficient vector
 
-You have probably seen this before: The OLS estimator for $\beta$ is given by $$\hat{\beta} = \mathbf{(X^{\prime}X)^{-1}X^{\prime}y}$$
+You have probably seen this before: The OLS estimator for $\beta$ is given by 
+
+$$
+\hat{\beta} = \mathbf{(X^{\prime}X)^{-1}X^{\prime}y}
+$$
 
 Let's translate this into R! Hints:
 
 - `t()` transposes matrices/vectors
 - `solve()` inverts matrices
-- `%*%` multiplies matrices vectors
+- `%*%` multiplies matrices/vectors
 
 
-```{r coef-est, exercise=TRUE}
+```{r coef-est, exercise=TRUE, eval=eval_ex}
 b <- ...
 ```
 
-```{r coef-est-solution}
+```{r coef-est-solution, eval=eval_sol, echo=eval_sol}
 b <- solve(t(X) %*% X) %*% t(X) %*% y
 ```
 
@@ -276,7 +300,7 @@ Hints:
 b <- solve(t(X) %*% X) %*% t(X) %*% y
 ```
 
-```{r sigma-est, exercise=TRUE, exercise.setup="sigma-est-setup"}
+```{r sigma-est, exercise=TRUE, eval=eval_ex,, exercise.setup="sigma-est-setup"}
 e <- ...
 N <- ...
 K <- ...
@@ -284,7 +308,7 @@ sigma2 <- ...
 Sigma <- ...
 ```
 
-```{r sigma-est-solution}
+```{r sigma-est-solution, eval=eval_sol, echo=eval_sol}
 e <- y - X %*% b
 N <- nrow(X)
 K <- ncol(X)
@@ -292,13 +316,83 @@ sigma2 <- t(e) %*% e / (N - K)
 Sigma <- as.vector(sigma2) * solve(t(X) %*% X)
 ```
 
-## Processing (prediction)
+### A basic regression table
+
+With $\hat{\beta}$ and $\hat{\mathbf{\Sigma}}$, we can calculate the standard errors of our coefficients, which are given by the square root of the diagonal of $\hat{\mathbf{\Sigma}}$.
+
+Using these, we can also calculate 95% confidence intervals for our coefficients, which are given by $\hat{\beta} + \Phi^{-1}(0.025) \cdot \text{SE}(\hat{\beta})$ and $\hat{\beta} + \Phi^{-1}(0.975) \cdot \text{SE}(\hat{\beta})$. Here $\Phi^{-1}$ is the quantile function of the standard normal distribution, which you can calculate with `qnorm()`.
+
+```{r reg-table-setup}
+b <- solve(t(X) %*% X) %*% t(X) %*% y
+e <- y - X %*% b
+N <- nrow(X)
+K <- ncol(X)
+sigma2 <- t(e) %*% e / (N - K)
+Sigma <- as.vector(sigma2) * solve(t(X) %*% X)
+```
+
+```{r reg-table, exercise=TRUE, eval=eval_ex,, exercise.setup="reg-table-setup"}
+tibble::tibble(
+  term = c("Intercept", "se_self", "la_self", "se_self:la_self"),
+  estimate = ...,
+  std_error = ...,
+  conf_low = ...,
+  conf_high = ...
+)
+```
+
+```{r reg-table-solution, eval=eval_sol, echo=eval_sol}
+tibble::tibble(
+  term = c("Intercept", "se_self", "la_self", "se_self:la_self"),
+  estimate = as.vector(b),
+  std_error = sqrt(diag(Sigma)),
+  conf_low = estimate + qnorm(.025) * std_error,
+  conf_high = estimate + qnorm(.975) * std_error
+)
+```
+
+### Validation
+
+Let's check if we got everything right!
+
+Estimate the model via `lm()` and extract the coefficient vector and the variance-covariance matrix of the coefficients.
+
+Then, use `all.equal()` with the option `check.attributes = FALSE` to check if our estimates differ from those generated via `lm()`.
+Note that you must supply identical object types, so convert `b` to a `vector`.
+
+```{r valid-1-setup}
+b <- solve(t(X) %*% X) %*% t(X) %*% y
+e <- y - X %*% b
+N <- nrow(X)
+K <- ncol(X)
+sigma2 <- t(e) %*% e / (N - K)
+Sigma <- as.vector(sigma2) * solve(t(X) %*% X)
+```
+
+```{r valid-1, exercise=TRUE, eval=eval_ex,, exercise.setup="valid-1-setup"}
+
+```
+
+```{r valid-1-solution, eval=eval_sol, echo=eval_sol}
+# Estimate model
+est_lm <- lm(sup_afd ~ se_self + la_self + se_self:la_self, data = gles)
+
+# Extract b and Sigma
+b_lm <- coef(est_lm)
+Sigma_lm <- vcov(est_lm)
+
+# Check for equality (with minor tolerance)
+all.equal(as.vector(b), b_lm, check.attributes = FALSE)
+all.equal(Sigma, Sigma_lm, check.attributes = FALSE)
+```
+
+## Bonus: Processing (prediction)
 
 With $\hat\beta$ and $\hat{\mathbf{\Sigma}}$, we have knowledge of the full sampling distribution for $\hat\beta$. This allows us to also get confidence intervals for any post-estimation quantities of interest that are functions of parameters and data.
 
 We are going to focus on *expected values*: $\mathbb{E}[y|\mathbf{\mathbf{x}^{\ast}}] = \mathbf{x}^{\ast\prime}\hat\beta$. The vector $\mathbf{x}^{\ast}$ can contain any (reasonable) scenario of covariate values. Here, we want to calculate expected values over the full grid of values of `se_self` and `la_self`.
 
-How can we get it's standard error? In OLS models, the variance of an expected value is given by 
+How can we get its standard error? In OLS models, the variance of an expected value is given by 
 
 $$\mathbf{x}^{\ast \prime} \hat{\mathbf{\Sigma}} \mathbf{x}^{\ast}$$
 
@@ -317,12 +411,12 @@ sigma2 <- t(e) %*% e / (N - K)
 Sigma <- as.vector(sigma2) * solve(t(X) %*% X)
 ```
 
-```{r proc1-1, exercise=TRUE, exercise.setup="proc1-1-setup"}
+```{r proc1-1, exercise=TRUE, eval=eval_ex,, exercise.setup="proc1-1-setup"}
 se_vals <- ...
 la_vals <- ...
 ```
 
-```{r proc1-1-solution}
+```{r proc1-1-solution, eval=eval_sol, echo=eval_sol}
 se_vals <- seq(0, 10, .25)
 la_vals <- seq(0, 10, .25)
 ```
@@ -344,11 +438,11 @@ se_vals <- seq(0, 10, .25)
 la_vals <- seq(0, 10, .25)
 ```
 
-```{r proc2-1, exercise=TRUE, exercise.setup="proc2-1-setup"}
+```{r proc2-1, exercise=TRUE, eval=eval_ex,, exercise.setup="proc2-1-setup"}
 pred <- ...
 ```
 
-```{r proc2-1-solution}
+```{r proc2-1-solution, eval=eval_sol, echo=eval_sol}
 pred <- array(NA, dim = c(length(se_vals), length(la_vals), 3L))
 ```
 
@@ -377,7 +471,7 @@ la_vals <- seq(0, 10, .25)
 pred <- array(NA, dim = c(length(se_vals), length(la_vals), 3L))
 ```
     
-```{r proc3-1, exercise=TRUE, exercise.setup="proc3-1-setup"}
+```{r proc3-1, exercise=TRUE, eval=eval_ex,, exercise.setup="proc3-1-setup"}
 for (i in ...) {
   for (j in ...) {
     x_star <- c(...)
@@ -389,7 +483,7 @@ for (i in ...) {
 }
 ```
 
-```{r proc3-1-solution}
+```{r proc3-1-solution, eval=eval_sol, echo=eval_sol}
 for (i in seq_along(se_vals)) {
   for (j in seq_along(la_vals)) {
     x_star <- c(1, se_vals[i], la_vals[j], se_vals[i] * la_vals[j])
@@ -456,37 +550,3 @@ regplane3D::plane3D(
 
 So, which substantive conclusions can we draw?
 
-## Bonus: Validity checks
-
-Let's check if we got everything right!
-
-Estimate the model via `lm()` and extract the coefficient vector and the variance-covariance matrix of the coefficients.
-
-Then, use `all.equal()` with the option `check.attributes = FALSE` to check if our estimates differ from those generated via `lm()`.
-Note that you must supply identical object types, so convert `b` to a `vector`.
-
-```{r valid-1-setup}
-b <- solve(t(X) %*% X) %*% t(X) %*% y
-e <- y - X %*% b
-N <- nrow(X)
-K <- ncol(X)
-sigma2 <- t(e) %*% e / (N - K)
-Sigma <- as.vector(sigma2) * solve(t(X) %*% X)
-```
-
-```{r valid-1, exercise=TRUE, exercise.setup="valid-1-setup"}
-
-```
-
-```{r valid-1-solution}
-# Estimate model
-est_lm <- lm(sup_afd ~ se_self + la_self + se_self:la_self, data = gles)
-
-# Extract b and Sigma
-b_lm <- coef(est_lm)
-Sigma_lm <- vcov(est_lm)
-
-# Check for equality (with minor tolerance)
-all.equal(as.vector(b), b_lm, check.attributes = FALSE)
-all.equal(Sigma, Sigma_lm, check.attributes = FALSE)
-```

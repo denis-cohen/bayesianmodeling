@@ -93,10 +93,10 @@ lapply(pkgs, library, character.only = TRUE)
 
 ### Self-learning: Take-home exercise
 
-As a segue from Week 1 to Week 2, I have prepared a self-learning module that covers the following topics:
+As a segue from Week 1 to Week 2, I have prepared a self-learn module that covers the following topics:
 
-- Linear algebra and programming basics (self-learn module)
-- Applied statistical programming in R
+- Linear algebra and programming basics
+- Statistical programming in R
 
 ### Self-learning: Your own project
 
@@ -137,20 +137,13 @@ Therefore, I encourage you to:
 1. Extend tools
 1. Decide how to proceed in your own work
 
-### A quick note on mathematical notation
-
-- The teaching materials for this course use mathematical notation
-- It is helpful, albeit not strictly necessary that you understand it:
-    - Mathematical notation is a compact and universal tool to convey concepts...
-    - ...but what really matters is that you understand the intuition of the underlying concepts...
-    - ...and you will not be asked to translate formulas into code.
-- If anything is unclear: Please ask at any time!
-
 ## Course materials
 
 ### GitHub
 
 All course materials are available on my GitHub: https://github.com/denis-cohen/bayesianmodeling 
+
+*Note:* The materials currently cover Week 1 and the take-home exercise. I will notify you once I add Week 2.
 
 ### Interactive tutorials
 
@@ -203,23 +196,18 @@ learnr::run_tutorial("02-03-lab", package = "bayesianmodeling")
 
 ## Take home exercise ----
 learnr::run_tutorial("03-00-the", package = "bayesianmodeling")
-
-## More to follow in Week 2!
 ```
 
 ### Static course materials
 
-#### Course notes
-
 I have also rendered the `learnr` tutorials (minus the interactive components) as static documents:
 
-- Lecture notes come in PDF format
-- Lab notes come in HTML format in two versions: with and without code-based solutions and outputs 
+- You can find HTML scripts of the **lecture slides** in the folder `lecture-materials`.
+- Likewise, you can find HTML scripts of the **lab exercises** in the folder `lab-materials`.
+- If you prefer working on the exercises outside of the interactive `learnr` environment (i.e., in a regular R session), you can use the `Rmd` files supplied in the same folder.
 
-Along with the data used in this course, these materials are available:
 
-1. from the GESIS Moodle course
-1. from my GitHub (see subfolders `lecture-materials`, `lab-materials`, and `data`)
+Along with the data used in this course, these materials are available from my GitHub (see subfolders `lecture-materials`, `lab-materials`, and `data`)
 
 ## Schedule
 

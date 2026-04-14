@@ -1,5 +1,5 @@
 ---
-title: 'Lecture: Applied Bayesian Statistics II'
+title: 'Lecture: Doing Bayesian data analysis with brms'
 output: 
   learnr::tutorial:
     progressive: true
@@ -60,6 +60,13 @@ lab3_url <-
   "https://github.com/denis-cohen/statmodeling/raw/main/data/lab3.RData"
 load(url(lab3_url))
 ```
+
+## Learning Goals
+
+- understand the basic functionality of the brms package
+- specify and estimate Bayesian regression models with brms
+- interpret model output and posterior summaries
+- carry out a basic Bayesian workflow in brms
 
 ## Overview
 
@@ -146,32 +153,6 @@ using Stan.](https://cloud.r-project.org/web/packages/brms/vignettes/brms_overvi
 </div>
 
 ## Linear model
-
-### Likelihood
-
-The linear model stipulates that the observed outcomes $y_i$ for every unit $i$ can be expressed as realizations from a normal distribution with unit-specific *mean or location parameter* $\mu_i$ and a constant (i.e., general) *variance or scale parameter* $\sigma^2$.
-
-$$y_i \sim \text{N}(\mu_i, \sigma^2) \text{ for all }i = 1,...N$$
-
-or, alternatively,
-
-$$y_i = \mu_i + \epsilon_i  \text{ for all }i = 1,...N \\ \epsilon_i \sim \text{N}(0, \sigma^2)$$
-
-The latter notation makes explicit that each observed $y_i$ can be thought of as a combination of a *systematic component*, $\mu_i$, and a *stochastic error component*, $\epsilon_i$, which follows a zero-mean normal distribution with constant variance $\sigma^2$.
-
-### The systematic component
-
-The systematic component is represented by the mean parameter $\mu_i$. In fact, $\mu_i$ is merely a *transformed parameter*: It is a linear function of unit-specific data $\mathbf{x}_i$ and coefficients $\beta$.
-
-The formula below illustrates this, using the row vector notation $\mathbf{x}_i^{\prime} \beta$ as shorthand for the scalar notation $\beta_1 + \beta_2 x_{i, 2} + ...+\beta_k x_{i,k}$.
-
-$$\mu_i = \underbrace{\mathbf{x}_i^{\prime} \beta}_{= \beta_1 + \beta_2 x_{i, 2} + ...+\beta_k x_{i,k}}  \text{ for all }i = 1,...N$$
-
-### Parameters and priors
-
-In the linear model, all coefficients $\beta$ as well as the variance $\sigma^2$ are model parameters.
-
-In Bayesian analysis, we must assign them priors (though `brms`, like Stan, will assign default uniform priors if we do not explicitly specify priors).
 
 ### Data
 
@@ -310,10 +291,9 @@ lm_brms
 Let's explore the following visualizations of common generic diagnostics:
 
 ```{r brms-visual, exercise=TRUE, eval=eval_ex, exercise.lines = 3}
-brms::mcmc_plot(lm_brms, type = "rhat") +  # Gelman-Rubin 
-  bayesplot::yaxis_text(hjust = 1)
-brms::mcmc_plot(lm_brms, type = "acf")     # Autocorrelation
-brms::mcmc_plot(lm_brms, type = "trace")   # Trace plots
+brms::mcmc_plot(lm_brms, type = "rhat")  # Gelman-Rubin 
+brms::mcmc_plot(lm_brms, type = "acf")   # Autocorrelation
+brms::mcmc_plot(lm_brms, type = "trace") # Trace plots
 ```
 
 
@@ -385,7 +365,7 @@ These packages not only come with incredible flexibility (see the links for deta
 
 ### Tables
 
-```{r modelsummary}
+```{r modelsummary, echo=TRUE}
 modelsummary::modelsummary(
   list("Model 1" = lm_brms),
   statistic = c("SD" = "({std.dev})", 
@@ -416,7 +396,7 @@ modelsummary::modelsummary(
   flextable::autofit()
 ```
 
-### Quantities of interest (QOIs) -- a refresher
+### Quantities of interest (QOIs)
 
 1. **Expected values**: Predicted levels of the outcome variable
     1. For hypothetical observations
@@ -425,56 +405,6 @@ modelsummary::modelsummary(
     1. For binary comparisons
     1. For multi-group comparisons** $\rightarrow$ pairwise binary comparisons
 1. **Average marginal effects:** Effects of continuous predictors
-
-
-### QOI example: logistic regression
-
-Here, you see a visualization of a logistic regression of voting for Joe Biden ($y=1$) as opposed to Donald Trump ($y=0$) in the 2020 US Presidential Election as a function of two predictors: respondents' ethnicity and their average feelings towards various ethnic minority groups (rated on a scale from 0 "cold" to 100 "warm").
-
-```{r logit1, echo=FALSE, fig.align='center', out.width='100%'}
-knitr::include_graphics("images/double-logit-plot-1.png")
-```
-
-The left-hand side shows the *linear component*, a linear function of the coefficient estimates and chosen predictor values.
-
-The right-hand side shows the *expected values*, which result from applying the *inverse link function* to this linear function.
-
-The X marks a *hypothetical observation*: a non-hispanic white respondent who feels moderately warm towards ethnic minorities.
-
-### QOI example: first differences
-
-```{r logit2, echo=FALSE, fig.align='center', out.width='100%'}
-knitr::include_graphics("images/background-plot-1.png")
-```
-
-The plots illustrate *observation-level first differences* in the probability of voting for Biden instead of Trump that result from a counterfactual comparison of ethnic minority vs non-hispanic white respondents.
-
-In generalized linear models, observation-level first differences are sensitive to the choice of background covariate values (here: feelings towards ethnic minorities).
-
-The *average first difference* takes the sample average of all observation-level first differences, thereby averaging over the variation induced by different covariate values.
-
-### QOI example: conditional effects (discrete interaction effects)
-
-```{r cqoi1, echo=FALSE, fig.align='center', out.width='100%'}
-knitr::include_graphics("images/unnamed-chunk-33-1.png")
-```
-
-Here, we see the effect of age on the probability of voting Biden vs. Trump, conditional on a *discrete moderator*, respondents' place of residence (four categories).
-
-On the left, we see the expected values. We see that support for Biden is generally lower in rural than in urban areas. Furthermore, the dependence of vote choice on age is greater in urban than in rural places: the prediction curve is flat in rural areas and downward-sloping in cities. This is also shown on the right-hand side, where we see the respective average marginal effects.
-
-
-### QOI example: conditional effects (gradual interaction)
-
-```{r cqoi2, echo=FALSE, fig.align='center', out.width='100%'}
-knitr::include_graphics("images/unnamed-chunk-36-1.png")
-```
-
-Lastly, we see the effect of respondents' feeling towards ethnic minorities on the probability of voting Biden vs. Trump, conditional on a *continuous moderator*, respondents' age (in years).
-
-On the left, we see the expected values, conditional on four exemplary values of the moderator. We see that the dependence of vote choice on feelings towards ethnic minorities decreases with age: the prediction curve is steepest for young respondents and flattest for old respondents. This is also shown on the right-hand side, where we see a gradual decline in the positive average marginal effect.
-
-
 
 ### Application: marginaleffects
 

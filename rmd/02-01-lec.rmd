@@ -38,6 +38,13 @@ rstan_options(auto_write = TRUE)             # avoid recompilation of models
 options(mc.cores = parallel::detectCores())  # parallelize across all CPUs
 ```
 
+## Learning Goals
+
+- understand when Bayesian methods are useful in applied research
+- compare common software options for Bayesian data analysis
+- explain the main steps of the Bayesian workflow
+- connect Bayesian modeling choices to substantive research questions
+
 ## Reasons for going Bayesian
 
 Practitioners choose to go Bayesian for a multitude of reasons. Any one
@@ -257,6 +264,8 @@ Why? Because many steps in the data analytical workflow remained disproportionat
     - Need to manually craft regression tables
     - Need to manually calculate substantive quantities of interest (e.g., expected values, average marginal effects)
     - Need to manually visualize quantities of interest
+
+## 
 
 ### Example I: A linear model in BUGS/JAGS
 
@@ -500,8 +509,8 @@ What happened? In my view:
 
 Today, Stan offers both
 
-- a high-end platform for model development and model building for advanced users in search of custom modeling solutions ($\rightarrow$ *Advanced Bayesian Statistical Modeling* -- Stan and `rstan`)
-- a versatile and relatively easy-to-use toolbox for applied researchers using **R** who seek to go Bayesian using pre-implemented models and functions ($\rightarrow$ *Introduction to Bayesian Statistics* -- `brms`; also `rstanarm`, `rethinking`)
+- a high-end platform for model development and model building for advanced users in search of custom modeling solutions ($\rightarrow$ *Week 2* -- Stan and `rstan`)
+- a versatile and relatively easy-to-use toolbox for applied researchers using **R** who seek to go Bayesian using pre-implemented models and functions ($\rightarrow$ *Week 1* -- `brms`; also `rstanarm`, `rethinking`)
 
 
 ## A simplified Bayesian workflow

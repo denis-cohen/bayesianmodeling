@@ -27,8 +27,9 @@ inline_child <- function(lines, output_path) {
 
 
 ## Meta information ----
-meta <- rio::import("rmd/meta.csv")
-formats <- c("learnr", "pdf", "html", "html_sol")
+meta <- rio::import("rmd/meta.csv") %>%
+  dplyr::slice(4:5)
+formats <- c("learnr", "html", "html_sol")
 
 ## Apply function within nested loop ----
 for (i in seq_len(nrow(meta))) {

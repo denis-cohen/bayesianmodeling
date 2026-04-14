@@ -81,52 +81,11 @@ instructions](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started) on t
 The workshop materials come as [`learnr`](https://rstudio.github.io/learnr/) tutorials wrapped in an R package. To download, install, and use the interactive materials, run the following code:
 
 
-``` r
-# Package installation ----
-## Detach if loaded ----
-if ("bayesianmodeling" %in% (.packages())) {
-  detach(package:bayesianmodeling, unload = TRUE)
-}
-
-## Uninstall if installed ----
-if ("bayesianmodeling" %in% installed.packages()) {
-  remove.packages("bayesianmodeling")
-}
-
-## Install if not installed ----
-if (!("devtools" %in% installed.packages())) {
-  install.packages("devtools")
-}
-
-## Load from GitHub ----
-library(devtools)
-devtools::install_github("denis-cohen/bayesianmodeling")
-
-## Load to library ----
-library(bayesianmodeling)
-
-# Run the tutorials (one at a time) ----
-## Introduction ----
-learnr::run_tutorial("00-00-int", package = "bayesianmodeling")
-
-## Day 1 ----
-learnr::run_tutorial("01-01-lec", package = "bayesianmodeling")
-learnr::run_tutorial("01-02-lec", package = "bayesianmodeling")
-learnr::run_tutorial("01-03-lab", package = "bayesianmodeling")
-
-## Day 2 ----
-learnr::run_tutorial("02-01-lec", package = "bayesianmodeling")
-learnr::run_tutorial("02-02-lec", package = "bayesianmodeling")
-learnr::run_tutorial("02-03-lab", package = "bayesianmodeling")
-
-## Take home exercise ----
-learnr::run_tutorial("03-00-the", package = "bayesianmodeling")
-```
 
 ### Static workshop materials
 
-- You can find static PDF versions of the lecture slides in the folder `lecture-materials`.
-- If you prefer working on the **lab exercises** outside of the interactive `learnr` environment (i.e., in a regular R session), you can use the `Rmd` files supplied in the folder `lab-materials`. These contains both exercises and solutions.
+- You can find HTML scripts of the **lecture slides** in the folder `lecture-materials`.
+- Likewise, you can find HTML scripts of the **lab exercises** in the folder `lab-materials`. These contains both exercises and solutions. If you prefer working on the exercises outside of the interactive `learnr` environment (i.e., in a regular R session), you can use the `Rmd` files supplied in the same folder.
 
 ## About the Instructor
 

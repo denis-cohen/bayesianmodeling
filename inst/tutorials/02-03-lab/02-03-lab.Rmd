@@ -1,5 +1,5 @@
 ---
-title: 'Lab: Applied Bayesian Statistics'
+title: 'Lab 2: Using brms'
 output: 
   learnr::tutorial:
     progressive: true
@@ -55,7 +55,31 @@ lapply(pkgs, library, character.only = TRUE)
 lab3_url <-
   "https://github.com/denis-cohen/statmodeling/raw/main/data/lab3.RData"
 load(url(lab3_url))
+
+# Function for formatting text-based solutions
+fold_sol <- function(text, title = "Solution") {
+  html <- markdown::mark(
+    text = text,
+    options = c("use_pandoc", "fragment_only")
+  )
+
+  cat(
+    paste0(
+      "<details>\n",
+      "<summary><strong>", title, "</strong></summary>\n\n",
+      html,
+      "\n</details>\n"
+    )
+  )
+}
 ```
+
+## Learning Goals
+
+- fit Bayesian models in brms for applied research questions
+- interpret posterior estimates and uncertainty substantively
+- assess model diagnostics and model fit
+- communicate results clearly and appropriately
 
 ## Logit model
 
@@ -164,7 +188,7 @@ custom_priors_logit
 
 Fit the model using `brms::brm()`. Pass your custom priors from `custom_priors_logit` to the model. 
 
-Run the model with four chains for 2000 iterations each, discarding the first 1000 draws as warmup. Set the seed to todays date, `20231123L`.
+Run the model with four chains for 2000 iterations each, discarding the first 1000 draws as warmup. Set the seed to today's date, `20260417L`.
 
 *Note:* Model compilation and estimation may take a while.
 
@@ -190,7 +214,7 @@ logit_brms <- brms::brm(
   warmup = 1000L,                        # number of warm-up samples per chain
   algorithm = "sampling",                # algorithm (HMC/NUTS)
   backend = "rstan",                     # backend (rstan)
-  seed = 20231123L                       # seed
+  seed = 20260417L                       # seed
 )
 ```
 
@@ -208,6 +232,12 @@ Print the model summary and check `Rhat` for any signs of non-convergence.
 logit_brms
 ```
 
+```{r rhat-written-solution, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+For all coefficients, the Rhat is below 1.1, showing that there are no signs of non-convergence. 
+")
+```
+
 ### Visual diagnostics
 
 Explore some visual diagnostics of your choice. See `help(mcmc_plot)` for types of plots.
@@ -220,6 +250,16 @@ Explore some visual diagnostics of your choice. See `help(mcmc_plot)` for types 
 brms::mcmc_plot(logit_brms, type = "rhat")  # Gelman-Rubin 
 brms::mcmc_plot(logit_brms, type = "acf")   # Autocorrelation
 brms::mcmc_plot(logit_brms, type = "trace") # Trace plots
+```
+
+```{r diag-plots-written-solution, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+Gelman-Rubin: All Rhat values are below 1.05, indicating that the chains have converged well. 
+
+Autocorrelation: For all parameters across all chains, autocorrelation decreases rapidly and approaches zero after only a few lags, indicating efficient mixing.
+
+Trace plots: The trace plots indicate good convergence of the MCMC chains. First, all chains are stationary, as they fluctuate around a constant level without any visible upward or downward trends. Second, the chains exhibit good mixing, moving rapidly up and down and forming a 'fuzzy band', which suggests low autocorrelation. Third, the chains overlap closely for each parameter and are largely indistinguishable from one another, indicating that they are sampling from the same posterior distribution.
+")
 ```
 
 ### Algorithm-specific diagnostics
@@ -274,6 +314,14 @@ marginaleffects::plot_slopes(logit_brms,
   )
 ```
 
+```{r subst1-written-solution, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+The marginal effect of right-wing immigration preferences on Green support is negative for both men and women. The effect appears to be more negative for women than for men. One may wonder if the magnitude of the negative effect among women is greater than that of the effect among men; to determine this, we would have to analyze the posterior of the effect difference.
+
+The marginal effect of left-wing socio-economic policy preferences on Green support is positive for men, as the credible interval lies entirely above zero. For women, the credible interval includes zero and negative values, indicating greater uncertainty about the direction of the effect.
+")
+```
+
 ## Posterior predictive checks
 
 ### Distributional congruence
@@ -292,6 +340,12 @@ brms::pp_check(logit_brms, ndraws = 1000, type = "bars")
 
 What do you conclude? Does our model get the numbers of green voters right?
 
+```{r pp1-solution, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+Yes, the model reliably reproduces the aggregate distribution of our outcome variable: the posterior predictions closely resemble the distributional shape of the observed data.
+")
+```
+
 ### Observation-level prediction error
 
 Now turn to the observation-level prediction error. This is best assessed by setting the arguments `type = "error_hist_grouped"` and `group = "vote_greens"`. What can you conclude from this plot?
@@ -302,4 +356,10 @@ Now turn to the observation-level prediction error. This is best assessed by set
 
 ```{r brms-lm-pp-2-solution, eval=eval_sol, echo=eval_sol}
 brms::pp_check(logit_brms, ndraws = 1, type = "error_hist_grouped", group = "vote_greens")
+```
+
+```{r pp2-solution, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+The model struggles to accurately identify respondents as Green voters. Many actual Green voters are predicted as non-Green voters, and vice versa.
+")
 ```

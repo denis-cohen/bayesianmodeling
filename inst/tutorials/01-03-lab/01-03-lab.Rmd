@@ -1,5 +1,5 @@
 ---
-title: 'Lab: Bayesian and Frequentist Inference'
+title: 'Lab 1: Conceptual foundations'
 output: 
   learnr::tutorial:
     progressive: true
@@ -38,7 +38,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## ---- CRAN Packages ----
 ## Save package names as a vector of strings
-pkgs <-  c("foreign", "MASS", "coda", "dplyr", "ggplot2", "ggpubr")
+pkgs <-  c("foreign", "MASS", "coda", "dplyr", "ggplot2", "ggpubr", "markdown")
 
 ## Install uninstalled packages
 lapply(pkgs[!(pkgs %in% installed.packages())], 
@@ -54,7 +54,7 @@ lapply(pkgs, library, character.only = TRUE)
 ## ---- Global learnr Objects ----
 ## Data
 gles <- 
-  read.dta("https://github.com/denis-cohen/statmodeling/raw/main/data/gles.dta")
+  foreign::read.dta("https://github.com/denis-cohen/statmodeling/raw/main/data/gles.dta")
 
 y <- gles$sup_afd
 X <- model.matrix( ~ se_self +
@@ -160,8 +160,31 @@ gibbs_draws <- lapply(seeds,
 
 # Store as mcmc.list
 gibbs_draws <- mcmc.list(gibbs_draws)
+
+# Function for formatting text-based solutions
+fold_sol <- function(text, title = "Solution") {
+  html <- markdown::mark(
+    text = text,
+    options = c("use_pandoc", "fragment_only")
+  )
+
+  cat(
+    paste0(
+      "<details>\n",
+      "<summary><strong>", title, "</strong></summary>\n\n",
+      html,
+      "\n</details>\n"
+    )
+  )
+}
 ```
 
+## Learning Goals
+
+- apply core concepts from Bayesian and frequentist inference
+- interpret intervals, probabilities, and uncertainty correctly
+- diagnose basic features of posterior draws and Markov chains
+- summarize and discuss Bayesian model results substantively
 
 ## Bayesian and frequentist inference: Interpretations
 
@@ -181,26 +204,39 @@ Frequentists would interpret a result with analogous confidence intervals as "st
 
 What statements could a Bayesian make about the posterior probability in support of the hypothesis of a positive effect?
 
+```{r solution-cred-interval, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+There is strong posterior evidence that the effect is positive. The 95% credible interval lies entirely above zero, and the posterior probability that the effect is greater than zero is between approximately 97.5% and 99.5%.
+
+The 99% credible interval includes zero, which means that the posterior probability that the effect is greater than zero is between approximately 97.5% and 99.5%, as there is between 0.5% and 2.5% posterior probability that the effect is negative (i.e., less than zero).
+")
+```
+
 ### $p$-values
 
 Suppose you have a sample of size $N=150$, from which you recover the sample mean of a continuous variable $X$. Your estimate for the sample mean is $\bar{X} = 129$, your estimate for the standard error of the sample mean is $\hat{\sigma}_{\bar{X}} = 15$.
 
 Let your null hypothesis be that the sample mean is equal to 100. Recover the $p$-value for a two-tailed test. What does this number mean?
 
-```{r p-val-exercixe, exercise=TRUE, eval=eval_ex}
+```{r p-val-exercise, exercise=TRUE, eval=eval_ex}
 
 ```
 
-```{r p-val-exercixe-solution, eval=eval_sol, echo=eval_sol}
+```{r p-val-exercise-solution, eval=eval_sol, echo=eval_sol}
 2 * pnorm(-abs((129 - 100)/ 15))
 ```
 
 *Hint:* You can click the light bulb icon to see the solution.
 
+```{r p-value-solution, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+The p-value is approximately 0.053. This means that, under the null hypothesis that the true mean equals 100, the probability of observing a sample mean as extreme as 129 (or more extreme) is about 5.3%, interpreted as a long-run frequency across repeated samples. Importantly, p-values do not provide the probability of support for an (alternative) hypothesis. Instead, they indicate the long-run proportion of obtaining results at least as extreme as the observed one under repeated sampling, assuming the null hypothesis is true. Since the p-value is slightly above the conventional significance level of α = 0.05, we fail to reject the null hypothesis, although the result is borderline.
+")
+```
+
 ### A comparison of two plots
 
 In the previous lecture, we saw two types of plots that vaguely resemble one another. The first is the plot from our coin flip experiment:
-
 
 ```{r coin-sim2, eval = TRUE, echo = FALSE, fig.align='center', out.width='75%'}
 set.seed(20210329)                   ### set seed for replicability
@@ -275,6 +311,14 @@ coda::traceplot(gibbs_draws)
 
 Carefully distinguish what the two types of plots show and what they are used for. Discuss how the meaning of the "iterations" shown along the horizontal $x$-axis differs between the two plots.
 
+```{r plots-solution, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+The first plot shows the evolution of the posterior of a parameter (e.g., the probability of heads π) as more data are observed. The x-axis represents the number of coin flips, meaning the same coin is flipped repeatedly, and with each iteration one additional data point is incorporated through Bayesian updating. The line depicts the posterior mean after each new observation, while the shaded area reflects uncertainty around this estimate. Importantly, at each iteration the posterior distribution is derived analytically rather than via MCMC, meaning it is calculated exactly based on the accumulated data.
+
+The trace plot is used to assess convergence within and across Markov chains, that is, whether the algorithm is correctly sampling from a fixed posterior distribution. The x-axis represents the iterations of the sampler, where each step corresponds to one draw in the MCMC algorithm. The lines show the sequence of posterior samples for the parameter (e.g., β₀), meaning they are draws from the posterior distribution. Over many iterations, these draws collectively approximate the posterior distribution.
+")
+```
+
 ### Random variables
 
 According to the [English-language Wikipedia](https://en.wikipedia.org/wiki/Random_variable), a *"random variable (also called random quantity, aleatory variable, or stochastic variable) is a mathematical formalization of a quantity or object which depends on random events"*. Its distribution is *"a probability measure on the set of all possible values of the random variable*". We usually think of these distributions in terms of known [probability distributions](https://en.wikipedia.org/wiki/Probability_distribution) (i.e., pmf's or pdf's).
@@ -284,9 +328,23 @@ Considering this definition and what you have learned today:
 -   Why do frequentists think of data, but not of parameters as random variables?
 -   Why do Bayesians think of parameters, but not of data as random variables?
 
+```{r rvs-solution, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+Frequentist analysis aims to infer population parameters, such as the population mean of a variable X. These parameters are assumed to be fixed, true, and unknown constants. In contrast, the data are considered random because each sample represents a stochastic draw from the population. Under the assumption of independent and identically distributed (IID) sampling, data could be repeatedly drawn, leading to variation across samples, while the underlying parameter remains unchanged.
+
+In Bayesian inference, the data are treated as fixed once they are observed, while the parameters are considered random variables. This is because unobserved quantities, such as the mean, are assigned probability distributions and are therefore characterized in terms of distributional properties. The data are not treated as random in the analysis because we condition on the observed data. Instead, the prior distribution is updated using the observed data, resulting in the posterior distribution, which reflects our updated beliefs about the parameter.
+")
+```
+
 ### Confidence intervals
 
 Somebody tries to convince you that a 95% confidence interval contains the true population parameter with 95% probability. Why is this incorrect?
+
+```{r cis-solution, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+This statement is incorrect because a given 95% confidence interval does not contain the true parameter with 95% probability or certainty. The interval either contains the true parameter or it does not, so the probability is either zero or one. Instead, a 95% confidence interval represents the long-run proportion of intervals that would contain the true parameter if the sampling process were repeated many times.
+")
+```
 
 ## Posterior summaries and convergence diagnostics
 
@@ -389,6 +447,16 @@ coda::gelman.diag(chains1)
 # proceed analogously for chains2 and chains3
 ```
 
+```{r conv-written-solution, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+Trace plot: At the beginning, the chains are not stationary and show poor mixing; however, this improves after 2000 iterations. This is the same for chains1, chains2, and chains3. It also illustrates why the early part of the chains is typically discarded as warm-up.
+
+
+Gelman-Rubin: The Gelman-Rubin statistic (R-hat) varies across chains1, chains2, and chains3. Values above 1.1 typically indicate that chains have not fully converged. This is not surprising given the within-chain and between-chain variance we see in the first two thirds of the chains. We can expect that the result would improve after discarding the first 2000 draws as warm-up.
+
+Autocorrelation: This is where chains1, chains2, and chains3 differ most. chains1 shows high autocorrelation, with values close to 1 that decrease only very slowly. This indicates that each draw strongly depends on previous draws in the Markov chain, meaning it takes very long for the sampler to effectively explore the posterior distribution. In chains 3, autocorrelation fades with higher-order lags, and approaches zero after 10-15 draws. This indicates that the sampler explores the posterior inefficiently, but more efficiently than in chains1. In chains2, there is virtually no autocorrelation.
+")
+```
 
 ## Diagnosing, interpreting, and reporting results from a Gibbs sampler for the linear model
 
@@ -460,6 +528,12 @@ coda::traceplot(gibbs_draws)
 coda::gelman.diag(gibbs_draws)
 ```
 
+```{r lm-written-solution, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+None of the four plots show signs of non-convergence. All plots show no trends (no upward and downward drift), appear stationary (the chains fluctuate around a stable value), and there is a strong overlap between the chians. Similarly, the Gelman-Rubin diagnostic remains below 1.1 for all parameters.
+")
+```
+
 ### Summarize the estimates
 
 The code chunk below contains code that pools the posterior draws across all chains. The resulting objects is a data frame, where each column holds the stacked posterior draws of a given parameter.
@@ -469,7 +543,6 @@ Summarize the posterior distribution in terms of posterior medians, posterior st
 ```{r lm-sum, exercise = TRUE, exercise.lines = 10}
 # Pool posterior draws across chains
 pooled_gibbs_draws <- do.call(rbind.data.frame, gibbs_draws)
-
 ```
 
 ```{r lm-sum-solution, eval=eval_sol, echo=eval_sol}
@@ -490,6 +563,14 @@ pooled_gibbs_draws %>%
 
 What are your substantive conclusions?
 
+```{r lm-subst-solution, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+The posterior median represents the central tendency, the standard deviation describes the spread of the effect, and the interval provides a quantile-based summary.
+These summaries therefore describe the posterior distribution of each regression parameter analogously to how point estimates, standard errors, and confidence intervals summarize sampling distributions in frequentist analysis.
+
+An interpretation example is the slope paramter for anti-immigration preferences, beta[la_self]. We learn that a one-unit increase toward more restrictive immigration preferences on the 0-10 scale predicts a 0.36 point increase in AfD support, measured on a -5 to +5 scale. The 95% credible intervals ranges from 0.31 and 0.41, which indicates a very high probability for a sizable positive effect.
+")
+```
 
 ## Probability distributions
 
@@ -525,6 +606,17 @@ c.  Voters' vote choices in a multi-party election
 d.  Countries' income distributions
 e.  Individuals' decisions to turnout in an election
 f.  Parliamentarians' number of missed plenary sessions
+
+```{r dists1-solution, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+a.  Individuals' time spent in unemployment before reemployment: Weilbull
+b.  Countries' unemployment rates: Beta
+c.  Voters' vote choices in a multi-party election: Categorical  
+d.  Countries' income distributions: Pareto 
+e.  Individuals' decisions to turnout in an election: Bernoulli 
+f.  Parliamentarians' number of missed plenary sessions: Poisson
+")
+```
 
 ### Bivariate density distributions
 
@@ -589,4 +681,14 @@ ggarrange(
   widths = c(2, 1),
   heights = c(1, 2)
 )
+```
+
+```{r dists2-solution, echo=FALSE, eval=eval_sol, results='asis'}
+fold_sol("
+Judging by the shape of the univariates marginal distributions, we can infer that x resembles a Beta distribution, y resembles a normal distribution.
+
+Judging by their respective distributional patterns, we can infer that x has a symmetrical bimodal shape. This shows that the rate and shape parameters are equal, and below one. We see that y is centered at zero and that most of the probability density lies between -5 and +5; this shows that it is a normal distribution with mean 0 and standard deviation 2.5.
+
+Lastly, judging by the bivariate density, we see that higher levels of x tend to go hand in hand with higher levels of y (and vice versa). This shows that both distributions are positively correlated.
+")
 ```

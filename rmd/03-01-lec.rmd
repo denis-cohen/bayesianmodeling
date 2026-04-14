@@ -271,3 +271,50 @@ The answers are simple:
 <blockquote>
   "Our logit model yields a predicted turnout probability of $0.88$ $[0.85, 0.91]$ in the treatment group, compared to $0.63$ $[0.59, 0.67]$ in the control group. The corresponding difference of $0.25$ $[0.22, 0.28]$ is of considerable substantive magnitude and statistically significant at the 95% level."
 </blockquote>
+
+### QOI example: logistic regression
+
+Here, you see a visualization of a logistic regression of voting for Joe Biden ($y=1$) as opposed to Donald Trump ($y=0$) in the 2020 US Presidential Election as a function of two predictors: respondents' ethnicity and their average feelings towards various ethnic minority groups (rated on a scale from 0 "cold" to 100 "warm").
+
+```{r logit1, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics("images/double-logit-plot-1.png")
+```
+
+The left-hand side shows the *linear component*, a linear function of the coefficient estimates and chosen predictor values.
+
+The right-hand side shows the *expected values*, which result from applying the *inverse link function* to this linear function.
+
+The X marks a *hypothetical observation*: a non-hispanic white respondent who feels moderately warm towards ethnic minorities.
+
+### QOI example: first differences
+
+```{r logit2, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics("images/background-plot-1.png")
+```
+
+The plots illustrate *observation-level first differences* in the probability of voting for Biden instead of Trump that result from a counterfactual comparison of ethnic minority vs non-hispanic white respondents.
+
+In generalized linear models, observation-level first differences are sensitive to the choice of background covariate values (here: feelings towards ethnic minorities).
+
+The *average first difference* takes the sample average of all observation-level first differences, thereby averaging over the variation induced by different covariate values.
+
+### QOI example: conditional effects (discrete interaction effects)
+
+```{r cqoi1, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics("images/unnamed-chunk-33-1.png")
+```
+
+Here, we see the effect of age on the probability of voting Biden vs. Trump, conditional on a *discrete moderator*, respondents' place of residence (four categories).
+
+On the left, we see the expected values. We see that support for Biden is generally lower in rural than in urban areas. Furthermore, the dependence of vote choice on age is greater in urban than in rural places: the prediction curve is flat in rural areas and downward-sloping in cities. This is also shown on the right-hand side, where we see the respective average marginal effects.
+
+
+### QOI example: conditional effects (gradual interaction)
+
+```{r cqoi2, echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics("images/unnamed-chunk-36-1.png")
+```
+
+Lastly, we see the effect of respondents' feeling towards ethnic minorities on the probability of voting Biden vs. Trump, conditional on a *continuous moderator*, respondents' age (in years).
+
+On the left, we see the expected values, conditional on four exemplary values of the moderator. We see that the dependence of vote choice on feelings towards ethnic minorities decreases with age: the prediction curve is steepest for young respondents and flattest for old respondents. This is also shown on the right-hand side, where we see a gradual decline in the positive average marginal effect.

@@ -1,5 +1,5 @@
 ---
-title: 'Lecture: Bayesian Fundamentals'
+title: 'Lecture: Fundamental concepts in Bayesian inference'
 output: 
   learnr::tutorial:
     progressive: true
@@ -154,6 +154,13 @@ draws_multiple_chains <- lapply(seeds,
 # Save as mcmc.list
 draws_multiple_chains <- as.mcmc.list(draws_multiple_chains)
 ```
+
+## Learning Goals
+
+- explain the core logic of Bayesian inference
+- distinguish priors, likelihoods, and posteriors
+- interpret posterior distributions and credible intervals correctly
+- understand the basic idea of MCMC sampling and convergence diagnosis
 
 ## Bayesian fundamentals
 

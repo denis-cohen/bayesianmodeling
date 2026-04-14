@@ -16,9 +16,7 @@ Imports:
     dplyr,
     ggplot2,
     ggpubr,
-    magick,
     rstan,
-    devtools,
     MASS,
     shinystan,
     bayesplot,
@@ -26,5 +24,8 @@ Imports:
     future,
     marginaleffects,
     modelsummary,
-    collapse
+    coda,
+    foreign,
+    markdown,
+    tibble
 RoxygenNote: 7.3.2

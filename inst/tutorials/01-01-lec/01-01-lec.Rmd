@@ -1,5 +1,5 @@
 ---
-title: 'Lecture: Probability Distributions and Frequentist Inference'
+title: 'Lecture: Introduction, R refresher, and limitations of frequentist inference'
 output: 
   learnr::tutorial:
     progressive: true
@@ -50,6 +50,14 @@ lapply(pkgs, library, character.only = TRUE)
 ```
 
 
+## Learning Goals
+
+- review basic R tools for vectors, matrices, and summaries
+- review functions and concepts for probability distributions
+- explain the logic of frequentist inference and sampling distributions
+- interpret confidence intervals and p-values correctly
+
+
 ## Selective R refresher
 
 ### Preface: Base R vs tidyverse
@@ -65,7 +73,7 @@ lapply(pkgs, library, character.only = TRUE)
 - both are fully compatible with one another
 - both are fully compatible with external packages
 - you can do amazing things by relying on one, on the other, or on both
-- we will use whichever best suits our purposes (but, mostly, specialized packages like `brms`, `modelsummary` and `marginaleffects`)
+- we will use whichever best suits our purposes (but, mostly, specialized packages like `brms`, `modelsummary`, and `marginaleffects`)
 
 ### Some important base R
 
@@ -81,24 +89,17 @@ A vector is a serial listing of data elements of the same type (e.g. `integer`, 
 
 ### Example
 
-```{r vec1_1, echo = TRUE}
-numeric_vector <- c(.99, 1.49, 1.99, 2.79, 1.89)
-```
-
 ```{r vec1_2, exercise=TRUE, eval=eval_ex}
 numeric_vector <- c(.99, 1.49, 1.99, 2.79, 1.89)
+numeric_vector
 ```
 
 ### Numeric matrices
 
 A matrix is a rectangular arrangement of data elements of the same type.
 
-
-```{r numeric_matrix_1, echo = TRUE}
-numeric_matrix <- matrix(seq(-.35, .35, .1), nrow = 2, ncol = 4)
-```
-
 ```{r numeric_matrix_2, exercise=TRUE, eval=eval_ex}
+numeric_matrix <- matrix(seq(-.35, .35, .1), nrow = 2, ncol = 4)
 numeric_matrix 
 ```
 
@@ -715,14 +716,14 @@ However, as we will learn in this course, the bold-printed is exclusive to the *
 
 - Consider an infinite population.
 - We want to infer the population proportion of a binary variable $X$ -- say, the number of café-goers who order beverages with oat milk.
-- For this task, we will simulate $S=10,000$ samples of size $N = 50$.
+- For this task, we will simulate $S=1,000$ samples of size $N = 50$.
 - Unbeknownst to us, the true population proportion is $\pi = 0.3$.
 - Given that $X$ is binary, we treat each sample as a series of independent Bernoulli trials -- i.e., a draw from a $\text{Binomial}(50, 0.3)$ distribution, where the probability parameter is equal to the population proportion of $X$.
 
 Let us first look at the variability in the number of oat-milk drinkers in our samples:
 
 ```{r sim-data, fig.align = "center", include = TRUE, fig.width=7, fig.height=7}
-n_samples <- 10000L
+n_samples <- 1000L
 n_obs <- 50L
 set.seed(20231121L)
 samples <- rbinom(n_samples, n_obs, prob = 0.3)
@@ -742,7 +743,7 @@ abline(v = mean(samples),
        col = adjustcolor("red", 0.5))
 ```
 
-As we can see, there is quite some variability: While many (precisely, `r sum(samples %in% 10:20)`) of our 10,000 samples produce between 10 and 20 oat-milk drinkers (with a mean of roughly `r round(mean(samples), 2)`), the numbers go as low as `r min(samples)` and as high as `r max(samples)`.
+As we can see, there is quite some variability: While many (precisely, `r sum(samples %in% 10:20)`) of our 1,000 samples produce between 10 and 20 oat-milk drinkers (with a mean of roughly `r round(mean(samples), 2)`), the numbers go as low as `r min(samples)` and as high as `r max(samples)`.
 
 This is indicative of the significant sampling variability we face when working with small samples.
 
@@ -798,8 +799,9 @@ se <- sqrt(((samples[1] / n_obs) * (1 - samples[1] / n_obs)) / n_obs)
 ci <- p + qt(c(0.025, .975), df = n_obs - 1) * se
 ```
 
-The first of our 10,000 samples produces the following number of oat-milk drinkers: `r samples[1]`:
+The first of our 1,000 samples produces the following:
 
+- The number of oat-milk drinkers: `r samples[1]`:
 - The sample proportion is `r round(p, 3)`.
 - The standard error of the sample proportion is `r round(se, 3)`.
 - The corresponding 95% confidence interval is `r paste(round(ci, 3), collapse = ", ")`.
@@ -827,7 +829,7 @@ A given 95% confidence interval does **not** contain the true parameter with 95%
 
 A 95% confidence interval [*"represents the long-run proportion of CIs (at the given confidence level) that theoretically contain the true value of the parameter"*](https://en.wikipedia.org/wiki/Confidence_interval).
 
-We can see this by looking back at our 10,000 samples:
+We can see this by looking back at our 1,000 samples:
 
 ```{r sim-cis, fig.align = "center", include = TRUE, fig.width=7, fig.height=7}
 p <- sort(samples / n_obs)
