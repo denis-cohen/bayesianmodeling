@@ -375,7 +375,7 @@ z <- dnorm(x_axis$seq) %*% t(dnorm(y_axis$seq)) %>%
 # )
 ```
 
-```{r bvnnorm-1-print, fig.align = "left"}
+```{r bvnnorm-1-print, fig.align = "center", out.width = "70%"}
 knitr::include_graphics("images/bvnnorm-1-1.png")
 ```
 
