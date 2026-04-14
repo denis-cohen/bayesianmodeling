@@ -27,7 +27,8 @@ Imports:
     coda,
     foreign,
     markdown,
-    tibble
+    tibble,
+    magick
 Remotes:
     denis-cohen/regplane3D
 RoxygenNote: 7.3.2
