@@ -1644,11 +1644,11 @@ for (n in 1:len_warmup) {
 }
 ```
 
-```{r warmup-zoom-display, fig.align='center', out.width='80%', eval=eval_learnr}
+```{r warmup-zoom-display, fig.align='center', out.width='576px', eval=eval_learnr}
 imgs <- list.files("img", pattern = "^warmup.*png$", full.names = TRUE)
 img_animated <- magick::image_read(imgs) %>%
   magick::image_animate(fps = 2) %>%
-  magick::image_resize("400x")
+  magick::image_resize("1152x1152")
 img_animated
 ```
 
