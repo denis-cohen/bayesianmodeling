@@ -38,15 +38,26 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## ---- CRAN Packages ----
 ## Save package names as a vector of strings
-pkgs <-  c("dplyr", "MASS", "ggplot2", "ggpubr")
+pkgs <- c("dplyr", "MASS", "ggplot2", "ggpubr")
 
-## Install uninstalled packages
-lapply(pkgs[!(pkgs %in% installed.packages())],
-       install.packages,
-       repos='http://cran.us.r-project.org')
+## Install uninstalled CRAN packages
+lapply(
+  pkgs[!(pkgs %in% installed.packages())],
+  install.packages,
+  repos = "http://cran.us.r-project.org"
+)
 
-## Load all packages to library and adjust options
+## Install regplane3D from GitHub if needed
+if (!("regplane3D" %in% installed.packages())) {
+  if (!("remotes" %in% installed.packages())) {
+    install.packages("remotes", repos = "http://cran.us.r-project.org")
+  }
+  remotes::install_github("denis-cohen/regplane3D")
+}
+
+## Load all packages to library
 lapply(pkgs, library, character.only = TRUE)
+library(regplane3D)
 ```
 
 
