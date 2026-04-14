@@ -1419,7 +1419,7 @@ if (eval_learnr) {
 }
 ```
 
-```{r warmup-zoom-prep, eval=eval_learnr}
+```{r warmup-zoom-prep, eval=FALSE}
 dir.create("img")
 
 for (n in 1:len_warmup) {
