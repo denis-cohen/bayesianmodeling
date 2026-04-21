@@ -1,3 +1,4 @@
+
 # Bayesian Modeling: From Foundations to Custom Solutions
 
 Denis Cohen  
@@ -61,101 +62,25 @@ encounter problems, feel free to send me an email.
 
 ### Week 1
 
-<table>
-<colgroup>
-<col style="width: 53%" />
-<col style="width: 46%" />
-</colgroup>
-<thead>
-<tr>
-<th style="text-align: left;">Session</th>
-<th style="text-align: left;">Topics</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><strong>Day 1 (April 16): Bayesian and
-frequentist inference - A juxtaposition</strong></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Morning session I
-(9:00-10:30)</strong></td>
-<td style="text-align: left;">Introduction</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td style="text-align: left;">Refresher on R and frequentist
-inference</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td style="text-align: left;">Limitations of frequentist inference</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Morning session II
-(10:45-12:15)</strong></td>
-<td style="text-align: left;">Fundamental concepts in Bayesian
-inference</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td style="text-align: left;">Analytical Bayes</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td style="text-align: left;">Numerical Bayes via Markov-Chain Monte
-Carlo sampling</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Afternoon session
-(13:45-15:15)</strong></td>
-<td style="text-align: left;">Group exercises</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td style="text-align: left;">Solutions and discussion</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Day 2 (April 17): Applied Bayesian
-statistics - A gentle introduction</strong></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Morning session I
-(9:00-10:30)</strong></td>
-<td style="text-align: left;">Going Bayesian in applied research: When,
-why, and how?</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td style="text-align: left;">Software solutions: An overview</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td style="text-align: left;">The Bayesian workflow</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Morning session II
-(10:45-12:15)</strong></td>
-<td style="text-align: left;">The brms package: Functionality</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td style="text-align: left;">Doing Bayesian data analysis with brms: A
-step-by-step walkthrough</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Afternoon session
-(13:45-15:15)</strong></td>
-<td style="text-align: left;">Group exercises</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td style="text-align: left;">Solutions and discussion</td>
-</tr>
-</tbody>
-</table>
+| Session | Topics |
+|:---|:---|
+| **Day 1 (April 16): Bayesian and frequentist inference - A juxtaposition** |  |
+| **Morning session I (9:00-10:30)** | Introduction |
+|  | Refresher on R and frequentist inference |
+|  | Limitations of frequentist inference |
+| **Morning session II (10:45-12:15)** | Fundamental concepts in Bayesian inference |
+|  | Analytical Bayes |
+|  | Numerical Bayes via Markov-Chain Monte Carlo sampling |
+| **Afternoon session (13:45-15:15)** | Group exercises |
+|  | Solutions and discussion |
+| **Day 2 (April 17): Applied Bayesian statistics - A gentle introduction** |  |
+| **Morning session I (9:00-10:30)** | Going Bayesian in applied research: When, why, and how? |
+|  | Software solutions: An overview |
+|  | The Bayesian workflow |
+| **Morning session II (10:45-12:15)** | The brms package: Functionality |
+|  | Doing Bayesian data analysis with brms: A step-by-step walkthrough |
+| **Afternoon session (13:45-15:15)** | Group exercises |
+|  | Solutions and discussion |
 
 ### Self-study
 
@@ -164,84 +89,21 @@ step-by-step walkthrough</td>
 
 ### Week 2
 
-<table>
-<colgroup>
-<col style="width: 53%" />
-<col style="width: 46%" />
-</colgroup>
-<thead>
-<tr>
-<th style="text-align: left;">Session</th>
-<th style="text-align: left;">Topics</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><strong>Day 3 (April 23) Statistical
-programming in R and Stan - An advanced introduction</strong></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Morning session I
-(9:00-10:30)</strong></td>
-<td style="text-align: left;">Programming in R: Review</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td style="text-align: left;">Generalized linear models</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Morning session II
-(10:45-12:15)</strong></td>
-<td style="text-align: left;">Stan: Programming language and
-documentation</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td style="text-align: left;">Programming and modeling in Stan:
-implementation, inference, and workflow</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Afternoon session
-(13:45-15:15)</strong></td>
-<td style="text-align: left;">Group exercises</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td style="text-align: left;">Solutions and discussion</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Day 4 (April 24) Applied Bayesian
-modeling in Stan</strong></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Morning session I
-(9:00-10:30)</strong></td>
-<td style="text-align: left;">Programming and modeling in Stan:
-extensions</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td style="text-align: left;">Efficiency tuning</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td style="text-align: left;">Post-processing posterior draws</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Morning session II
-(10:45-12:15)</strong></td>
-<td style="text-align: left;">Choosing between pre-implemented and
-custom solutions</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Afternoon session
-(13:45-15:15)</strong></td>
-<td style="text-align: left;">Individual consultations</td>
-</tr>
-</tbody>
-</table>
+| Session | Topics |
+|:---|:---|
+| **Day 3 (April 23) Statistical programming in R and Stan - An advanced introduction** |  |
+| **Morning session I (9:00-10:30)** | Programming in R: Review |
+|  | Generalized linear models |
+| **Morning session II (10:45-12:15)** | Stan: Programming language and documentation |
+|  | Programming and modeling in Stan: implementation, inference, and workflow |
+| **Afternoon session (13:45-15:15)** | Group exercises |
+|  | Solutions and discussion |
+| **Day 4 (April 24) Applied Bayesian modeling in Stan** |  |
+| **Morning session I (9:00-10:30)** | Programming and modeling in Stan: extensions |
+|  | Efficiency tuning |
+|  | Post-processing posterior draws |
+| **Morning session II (10:45-12:15)** | Choosing between pre-implemented and custom solutions |
+| **Afternoon session (13:45-15:15)** | Individual consultations |
 
 ## Using the workshop materials
 
@@ -252,55 +114,66 @@ The workshop materials come as
 package. To download, install, and use the interactive materials, run
 the following code:
 
-    # Package installation ----
-    ## Detach if loaded ----
-    if ("bayesianmodeling" %in% (.packages())) {
-      detach(package:bayesianmodeling, unload = TRUE)
-    }
+``` r
+# Package installation ----
+## Detach if loaded ----
+if ("bayesianmodeling" %in% (.packages())) {
+  detach(package:bayesianmodeling, unload = TRUE)
+}
 
-    ## Uninstall if installed ----
-    if ("bayesianmodeling" %in% installed.packages()) {
-      remove.packages("bayesianmodeling")
-    }
+## Uninstall if installed ----
+if ("bayesianmodeling" %in% installed.packages()) {
+  remove.packages("bayesianmodeling")
+}
 
-    ## Install if not installed ----
-    if (!("devtools" %in% installed.packages())) {
-      install.packages("devtools")
-    }
+## Install if not installed ----
+if (!("devtools" %in% installed.packages())) {
+  install.packages("devtools")
+}
 
-    ## Load from GitHub ----
-    library(devtools)
-    devtools::install_github("denis-cohen/bayesianmodeling")
+## Load from GitHub ----
+library(devtools)
+devtools::install_github("denis-cohen/bayesianmodeling")
 
-    ## Load to library ----
-    library(bayesianmodeling)
+## Load to library ----
+library(bayesianmodeling)
 
-    # Run the tutorials (one at a time) ----
-    ## Introduction ----
-    learnr::run_tutorial("00-00-int", package = "bayesianmodeling")
+# Run the tutorials (one at a time) ----
+## Introduction ----
+learnr::run_tutorial("00-00-int", package = "bayesianmodeling")
 
-    ## Day 1 ----
-    learnr::run_tutorial("01-01-lec", package = "bayesianmodeling")
-    learnr::run_tutorial("01-02-lec", package = "bayesianmodeling")
-    learnr::run_tutorial("01-03-lab", package = "bayesianmodeling")
+## Day 1 ----
+learnr::run_tutorial("01-01-lec", package = "bayesianmodeling")
+learnr::run_tutorial("01-02-lec", package = "bayesianmodeling")
+learnr::run_tutorial("01-03-lab", package = "bayesianmodeling")
 
-    ## Day 2 ----
-    learnr::run_tutorial("02-01-lec", package = "bayesianmodeling")
-    learnr::run_tutorial("02-02-lec", package = "bayesianmodeling")
-    learnr::run_tutorial("02-03-lab", package = "bayesianmodeling")
+## Day 2 ----
+learnr::run_tutorial("02-01-lec", package = "bayesianmodeling")
+learnr::run_tutorial("02-02-lec", package = "bayesianmodeling")
+learnr::run_tutorial("02-03-lab", package = "bayesianmodeling")
 
-    ## Take home exercise ----
-    learnr::run_tutorial("03-00-the", package = "bayesianmodeling")
+## Take home exercise ----
+learnr::run_tutorial("03-00-the", package = "bayesianmodeling")
+
+## Day 3 ----
+learnr::run_tutorial("03-01-lec", package = "bayesianmodeling")
+learnr::run_tutorial("03-02-lec", package = "bayesianmodeling")
+learnr::run_tutorial("03-03-lab", package = "bayesianmodeling")
+
+## Day 4 ----
+learnr::run_tutorial("04-01-lec", package = "bayesianmodeling")
+learnr::run_tutorial("04-02-lec", package = "bayesianmodeling")
+```
 
 ### Static workshop materials
 
--   You can find HTML scripts of the **lecture slides** in the folder
-    `lecture-materials`.
--   Likewise, you can find HTML scripts of the **lab exercises** in the
-    folder `lab-materials`. These contains both exercises and solutions.
-    If you prefer working on the exercises outside of the interactive
-    `learnr` environment (i.e., in a regular R session), you can use the
-    `Rmd` files supplied in the same folder.
+- You can find HTML scripts of the **lecture slides** in the folder
+  `lecture-materials`.
+- Likewise, you can find HTML scripts of the **lab exercises** in the
+  folder `lab-materials`. These contains both exercises and solutions.
+  If you prefer working on the exercises outside of the interactive
+  `learnr` environment (i.e., in a regular R session), you can use the
+  `Rmd` files supplied in the same folder.
 
 ## About the Instructor
 

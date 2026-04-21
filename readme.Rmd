@@ -120,6 +120,15 @@ learnr::run_tutorial("02-03-lab", package = "bayesianmodeling")
 
 ## Take home exercise ----
 learnr::run_tutorial("03-00-the", package = "bayesianmodeling")
+
+## Day 3 ----
+learnr::run_tutorial("03-01-lec", package = "bayesianmodeling")
+learnr::run_tutorial("03-02-lec", package = "bayesianmodeling")
+learnr::run_tutorial("03-03-lab", package = "bayesianmodeling")
+
+## Day 4 ----
+learnr::run_tutorial("04-01-lec", package = "bayesianmodeling")
+learnr::run_tutorial("04-02-lec", package = "bayesianmodeling")
 ```
 
 ### Static workshop materials
