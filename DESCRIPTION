@@ -17,6 +17,7 @@ Imports:
     ggplot2,
     ggpubr,
     rstan,
+    rstantools,
     MASS,
     shinystan,
     bayesplot,
@@ -25,10 +26,19 @@ Imports:
     marginaleffects,
     modelsummary,
     coda,
+    devtools,
     foreign,
+    gridExtra,
+    lme4,
     markdown,
+    patchwork,
+    posterior,
+    regplane3D,
     tibble,
-    magick
+    tidyr,
+    viridis,
+    magick,
+    collapse
 Remotes:
     denis-cohen/regplane3D
 RoxygenNote: 7.3.2

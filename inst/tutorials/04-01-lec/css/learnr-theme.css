@@ -1,0 +1,156 @@
+:root {
+  --mzes-white: #FFFFFF;
+  --mzes-cyan: #003056;
+  --mzes-gold: #D6C282;
+  --mzes-cyan-light: #D9E0E6;
+  --mzes-beige: #fbf9f2;
+}
+
+@import url("https://fonts.googleapis.com/css?family=Montserrat");
+@import url("https://fonts.googleapis.com/css?family=Fira+Mono");
+@import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700");
+
+body {
+  background-color: var(--mzes-white);
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: 12px;
+}
+
+em {
+  font-family: "Source Sans Pro", sans-serif;
+  color: slategrey;
+}
+
+.ace-tm {
+  background-color: var(--mzes-white);
+  color: black;
+}
+
+.panel,
+pre {
+  border-radius: 0;
+  border-color: var(--mzes-cyan-light);
+  background-color: var(--mzes-white);
+}
+
+.panel-default > .panel-heading {
+  color: var(--mzes-cyan);
+  background-color: var(--mzes-white);
+  border-color: var(--mzes-cyan-light);
+}
+
+.topicsList .topic {
+  font-family: "Montserrat", sans-serif;
+  line-height: 40px;
+  font-size: 15px;
+  padding-left: 10px;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  background-size: 2px 80px;
+  background-position: left 100%;
+  background-position-y: 100%;
+  background-image: url(images/topicProgress.png);
+  border-bottom: 1px solid slategrey;
+  -webkit-transition-property: background-position;
+  transition-property: background-position;
+  -webkit-transition-duration: 0.25s;
+  transition-duration: 0.25s;
+}
+
+.topicsList .topic.current {
+  font-family: "Montserrat", sans-serif;
+  background-color: var(--mzes-cyan);
+  color: var(--mzes-white);
+  border: 0px;
+}
+
+.topicsList .topic.current,
+.topicsList .topic.current * {
+  color: var(--mzes-white) !important;
+}
+
+code {
+  font-family: "Fira Mono", monospace;
+  color: var(--mzes-gold);
+  background-color: var(--mzes-white);
+  font-size: 12px;
+}
+
+a {
+  font-family: "Montserrat", sans-serif;
+  color: slategrey;
+  text-decoration: none;
+}
+
+.btn-primary,
+.btn-success,
+.btn-info {
+  color: var(--mzes-white);
+  background-color: var(--mzes-cyan);
+  background-image: none;
+  border: none;
+  font-family: "Montserrat", sans-serif;
+}
+
+.btn-default {
+  color: var(--mzes-white);
+  background-color: var(--mzes-cyan);
+  background-image: none;
+  border: none;
+  font-family: "Montserrat", sans-serif;
+}
+
+.btn-primary.disabled,
+.btn-primary:disabled,
+.btn-primary.disabled:hover,
+.btn-primary:disabled:hover,
+.btn-success.disabled,
+.btn-success:disabled,
+.btn-success.disabled:hover,
+.btn-success:disabled:hover,
+.btn-info.disabled,
+.btn-info:disabled,
+.btn-info.disabled:hover,
+.btn-info:disabled:hover {
+  background-color: var(--mzes-cyan-light);
+}
+
+.btn.disabled,
+.btn[disabled],
+fieldset[disabled] .btn {
+  cursor: not-allowed;
+  opacity: 0.65;
+  filter: alpha(opacity=65);
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+h2 {
+  color: var(--mzes-cyan);
+  font-family: "Montserrat", sans-serif;
+}
+
+h3 {
+  color: var(--mzes-cyan);
+  font-family: "Montserrat", sans-serif;
+}
+
+details summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary::before {
+  content: "\25B6";
+  display: inline-block;
+  margin-right: 0.4em;
+  transition: transform 0.15s ease;
+}
+
+details[open] summary::before {
+  transform: rotate(90deg);
+}

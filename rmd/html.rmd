@@ -8,9 +8,11 @@ output:
 ---
 
 ```{r, echo=FALSE}
-eval_ex <- TRUE
-eval_sol <- FALSE
+eval_ex <- FALSE
+eval_sol <- TRUE
+echo_sol <- TRUE
 eval_learnr <- TRUE
+eval_learnr_sol <- FALSE
 
 knitr::opts_chunk$set(message = FALSE,
                       warning = FALSE)

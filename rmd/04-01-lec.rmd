@@ -1,0 +1,1043 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+## ---- CRAN Packages ----
+## Save package names as a vector of strings
+pkgs <-  c("rstan",
+           "rstantools", 
+           "coda",
+           "dplyr",
+           "lme4", 
+           "ggplot2",
+           "foreign",
+           "bayesplot")
+
+## Install uninstalled packages
+lapply(pkgs[!(pkgs %in% installed.packages())], 
+       install.packages,
+       repos='http://cran.us.r-project.org')
+
+## Load all packages to library and adjust options
+lapply(pkgs, library, character.only = TRUE)
+
+## ---- GitHub Packages ----
+
+
+## ---- Global learnr Objects ----
+lab5_url <-
+  "https://github.com/denis-cohen/statmodeling/raw/main/data/lab5.RData"
+load(url(lab5_url))
+
+gles <- 
+  read.dta("https://github.com/denis-cohen/statmodeling/raw/main/data/gles.dta")
+gles$vote_afd = ifelse(gles$vote == "AfD", 1L, 0L)
+gles$bl <- droplevels(gles$bl)
+
+## ---- export function ----
+export <- function(env = environment()) {
+  invisible({
+    global_obj <- eval(global_objects, envir = globalenv())
+    local_obj <- ls(envir = env)
+    new_obj <- local_obj[!(local_obj %in% global_obj)]
+    sapply(new_obj, function(x) {
+      assign(x, get(eval(x, envir = env), envir = env), envir = globalenv())
+    })
+  })
+  if (!is.null(new_obj)){
+    print("Exported objects:")
+    print(new_obj)
+  }
+}
+global_objects <- c(ls(), "global_objects")
+
+## ---- rstan Options ----
+rstan_options(auto_write = TRUE)             # avoid recompilation of models
+options(mc.cores = parallel::detectCores())  # parallelize across all CPUs
+```
+
+
+
+## Model blocks
+
+### Main model blocks for Bayesian inference
+
+As we established in the last session, a Stan program for *Bayesian inference* must include the following model blocks:
+
+1. **Data**: Declare all known quantities, including data types, dimensions, and constraints
+1. **Parameters**: Declare unknown 'base' quantities, including storage types, dimensions, and constraints
+1. **Model**: Declare and specify local variables (optional); specify sampling statements for priors and likelihood
+
+### Other model blocks
+
+In this session, we want to pay closer attention to the four other [model blocks](https://mc-stan.org/docs/reference-manual/blocks.html):
+
+1. **Functions**: Declare user written functions
+1. **Transformed Data**: Declare and define/transform data inputs 
+1. **Transformed Parameters**: Declare and transform parameters 
+1. **Generated Quantities**: Declare and generate derivative quantities
+
+
+
+### "Trivial" tasks
+
+Stan is a full-blown statistical programming language. We can therefore accommodate tasks like data pre-processing and estimate post-processing (QOI generation) as part of our Stan models.
+
+As `rstan` users, however, the question with many of these tasks is whether we cannot accommodate them more efficiently in R before or after estimation.
+
+
+### Some tasks that *can* be implemented as part of a Stan program
+
+- Data standardization:
+    - We could first define a function that standardizes our variables in the `functions` block and then apply it to the data in the `transformed data` block.
+    - But we can equally standardize the data in R and pass the standardized variables to Stan.
+- Transformed parameters:
+    - Last session, we sampled the linear predictor `eta` as a global variable in the `transformed parameters` block, which we (could have) sampled.
+    - We could have equally defined `eta` as a temporary local variable in the `model block`, where it would have been discarded after each iteration...
+    - ...and recovered it post-estimation in R per $\mathbf{X\beta}$ if desired.
+- Quantities of interest:
+    - We can use the `generated quantities` block to calculate quantities of interest (expected values, average marginal effects, etc.) or to implement posterior predictive checks.
+    - But we can equally do this just in R using the posterior draws and the data.
+    
+### My recommendation
+
+There is nothing wrong with accommodating such "trivial tasks" in Stan. But several efficiency concerns speak against it:
+
+- If you are more proficient in R than in Stan, implementing tasks in Stan that you could easily perform in R is time not wisely invested.
+- If you need to adjust transformations on a rolling basis (e.g., changing covariate scenarios for your quantities of interest), it is wise to separate estimation from post-estimation work.
+- Computational resources can be *expensive*.
+    - Once your Stan models get too big to run on local machines, efficiency is money (literally).
+    - Minimize run times by restricting your Stan model to essential tasks (i.e., estimation).
+    - Limit your RAM usage to what's necessary; do not sample (transformed) parameters you do not need.
+- Keeping your Stan model program slim makes debugging easier.
+
+### Other model blocks: Essential tasks
+
+There are, however, some essential tasks that should or must be accommodated in Stan:
+
+- Functions needed for estimation (e.g., custom log-density functions)
+- Transformed parameters that are of primary interest
+    - In many instances, it is computationally *more* efficient to specify priors for "raw parameters" and transform these before they enter the likelihood.
+    - In these cases, your primary concern should be sampling and diagnosing the transformed parameters.
+
+## Extensions
+
+### Example 1: Weighted likelihood
+
+- Weights ensure that observations do not contribute to the log-likelihood equally, but proportionally to their idiosyncratic weights.
+- Let's incorporate this feature into our Stan program for the linear model. 
+- The hack requires two things:
+    - the definition of a new function
+    - Two minor, single-line modifications: One in the `data`, one in the `model` block 
+    
+### The unweighted normal log-likelihood
+
+We first need to understand the built-in function for the unweighted log-likelihood, `normal_lpdf`. 
+
+`normal_lpdf` defines the log of the [normal probability density function](https://en.wikipedia.org/wiki/Normal_distribution) (pdf) and sums across the resulting values of all observations, which returns a scalar:
+
+$$ \mathtt{normal\_lpdf(y | eta, sigma)} = \sum_{i=1}^{N} - \frac{1}{2} \log (2 \pi \sigma^2) \Big( \frac{y_i-\eta_i}{\sigma}\Big)^2$$
+
+### The weighted normal log-likelihood
+
+Why is this problematic? 
+
+- To include weights, we need to weight every single entry in the log normal pdf *prior to* aggregation. 
+- So, we need a length-$N$ vector of $\mathtt{normal\_lpdf}$ values that we can then multiply with a length-$N$ vector of weights before we sum across all observations. 
+- We therefore define a new function that returns the point-wise log normal pdf:
+
+```{stan ext1a, output.var="ext1a", eval = FALSE, echo = TRUE}
+functions {
+  vector pw_norm(vector y, vector eta, real sigma) {
+    return -0.5 * (log(2 * pi() * square(sigma)) + 
+                     square((y - eta) / sigma));
+  }
+}
+```
+
+
+### Code modifications
+
+The remaining modifications are straightforward:
+
+- We declare a vector of length $N$ with idiosyncratic weights in the data block.
+- In the model block,  we take the dot product of the `weights` vector and the vector of log-likelihood entries generated by `pw_norm`:
+
+```{stan ext1b, output.var="ext1b", eval = FALSE, echo = TRUE}
+data {
+  ...
+  vector<lower=0>[N] weights;  // weights
+}
+
+...
+
+model {
+  ...
+  
+  // weighted log-likelihood
+  target += dot_product(weights, pw_norm(y, eta, sigma));
+}
+
+```
+
+The dot product returns the sum of the pairwise products of entries of both vectors, which gives us our weighted log-likelihood:
+
+$$\mathtt{dot\_product(weights, pw\_norm(y, eta, sigma))} = \\ \sum_{i=1}^{N}\mathtt{weights}_i \times -\frac{1}{2} \log (2 \pi \sigma^2) \Big( \frac{y_i-\eta_i}{\sigma}\Big)^2$$
+
+### Example 2: Standardized Data
+
+- For this example, we use the transformed data block to standardize our outcome variable and predictors. 
+- Standardization can help us *boost the efficiency* of our model by allowing the model to converge toward the posterior distribution faster.
+
+### Transformed data 
+
+- Our initial data inputs remain the same as in the original example: We declare $N$, $K$, $\mathbf{X}$ and $\mathbf{y}$ in the data block. 
+- We then use the transformed data block to standardize both $\mathbf{y}$ and every column of $\mathbf{X}$ (except the leading column of 1's that multiplies the intercept).
+
+```{stan ext2-1, output.var="ext2-1", eval = FALSE, echo = TRUE}
+transformed data {
+  vector[K-1] sd_x;        // std. dev. of predictors (excl. intercept)
+  vector[K-1] mean_x;      // mean of predictors (excl. intercept)
+  vector[N] y_std;         // std. outcome 
+  matrix[N, K] x_std = x;  // std. predictors
+  
+  y_std = (y - mean(y)) / sd(y);
+  for (k in 2:K) {
+    mean_x[k-1] = mean(x[, k]);
+    sd_x[k-1] = sd(x[, k]);
+    x_std[, k] = (x[, k] - mean_x[k-1]) / sd_x[k-1]; 
+  }
+}
+```
+
+### Consequences and code modifications
+
+- As a result of standardization, the scale of our estimated parameters changes. 
+- But we can use the `generated quantities` block to transform these parameters back to their original scale.
+- For now, we only need to declare the parameters for the standardized variables.
+
+
+```{stan ext2-2, output.var="ext2-2", eval = FALSE, echo = TRUE}
+parameters {
+  vector[K] beta_std;      // coef vector
+  real<lower=0> sigma_std; // scale parameter
+}
+
+model {
+  // local variables
+  vector[N] eta_std;          // declare lin. pred.
+  eta_std = x_std * beta_std; // assign lin. pred.
+
+  // priors
+  target += normal_lpdf(beta_std | 0, 10);  // priors for beta_std
+  target += cauchy_lpdf(sigma_std | 0, 5);  // prior for sigma_std
+  
+  // log-likelihood
+  target += normal_lpdf(y_std | eta_std, sigma_std); // likelihood
+}
+```
+
+### Retrieving the original parameters
+
+Using our draws for the alternative parameters `beta_std` and `sigma_std`, we can then use a little algebra to retrieve the original parameters:
+
+- $\beta_1 = \text{sd}(y) \Big(\beta_1^{\text{std}} - \sum_{k=2}^{K} \beta_k^{\text{std}} x_k^{\text{std}}\Big) + \bar{\mathbf{y}}$
+- $\beta_k = \beta_k^{\text{std}} \frac{\text{sd}(y)}{\text{sd}(x_k)} \text{ for } k = 2,...,K$
+- $\sigma = \text{sd}(y) \sigma^{\text{std}}$
+
+These calculations are implemented in the generated quantities block below:
+
+```{stan ext2-3, output.var="ext2-3", eval = FALSE, echo = TRUE}
+generated quantities {
+  vector[K] beta;          // coef vector
+  real<lower=0> sigma;     // scale parameter
+  
+  beta[1] = sd(y) * (beta_std[1] - 
+    dot_product(beta_std[2:K], mean_x ./ sd_x)) + mean(y);
+  beta[2:K] = beta_std[2:K] ./ sd_x * sd(y);
+  sigma = sd(y) * sigma_std;
+}
+```
+
+### Sampling
+
+We can then simply sample the original parameters produced in the `generated quantities` block:
+
+```{r inf-sampl, eval = F, echo = TRUE}
+lm_std <- rstan::sampling(
+  lm_std,                     # compiled model
+  data = standat_inf,         # data input
+  algorithm = "NUTS",         # algorithm
+  control = list(             # control arguments
+    adapt_delta = .85
+  ),
+  save_warmup = FALSE,        # discard warmup sims
+  sample_file = NULL,         # no sample file
+  diagnostic_file = NULL,     # no diagnostic file
+  pars = c("beta", "sigma"),  # select parameters
+  iter = 2000L,               # iter per chain
+  warmup = 1000L,             # warmup period
+  thin = 2L,                  # thinning factor
+  chains = 2L,                # num. chains
+  cores = 2L,                 # num. cores
+  seed = 20210329)            # seed
+```
+
+### Efficiency concerns
+
+Note that this procedure is essentially cost-free and likely to speed up computation:
+
+- `transformed data` is only evaluated once; essentially zero extra time
+- sampling in `model` will be faster
+- while evaluated after each iteration, the transformations in `generated quantities` simple and have no feedback into the `model` block
+- we do not need to sample additional parameters
+
+### Example 3: Prior and posterior predictive checks
+
+We can extend the linear model code to accommodate either prior or posterior predictive checks.
+
+We do so by passing a quasi-logical binary variable `prior_only` to `data`: 
+
+```{stan ext3-1, output.var="ext3-1", eval = FALSE, echo = TRUE}
+data {
+  ...
+  int<lower=0, upper=1> prior_only;
+}
+```
+
+This serves as a switch that turns the likelihood on/off in `model`:
+
+```{stan ext3-2, output.var="ext3-2", eval = FALSE, echo = TRUE}
+model {
+  ...
+  if (prior_only == 0) {
+    target += normal_lpdf(y | mu, sigma);
+  }
+}
+```
+
+Setting `prior_only == 0` means we use the likelihood, and update our parameters `beta` and `sigma`.
+
+Setting `prior_only == 1` means we do not update from the prior state, and simply sample from the vague prior distributions.
+
+### Simulating the outcome
+
+We can then use a random number generation, `normal_rng()`---Stan's equivalent to R's `rnorm()`---to generate our prior/posterior predicted values.
+
+```{stan ext3-3, output.var="ext3-3", eval = FALSE, echo = TRUE}
+generated quantities {
+  vector[N] mu;
+  vector[N] y_rep;
+
+  mu = x * beta;
+
+  for (n in 1:N) {
+    y_rep[n] = normal_rng(mu[n], sigma);
+  }
+}
+```
+
+
+## The hierarchical logit model
+
+### Starting point: Building a simple logit model
+
+Below, you find the code for the linear model from the previous lecture.
+
+*Note:* `eta` is now a local variable in the `model` block, not a variable in the `transformed parameters` block.
+
+Let's use it a basis to build our logit model.
+
+  - Which quantities can stay?
+  - Which quantities must go?
+  - What do we need to add?
+  - What do we need to change?
+
+```{stan logit1, exercise = TRUE, output.var = "none", exercise.lines = 25}
+data {
+  int<lower=1> N; // num. observations
+  int<lower=1> K; // num. predictors
+  matrix[N, K] x; // design matrix
+  vector[N] y;    // outcome vector
+}
+
+parameters {
+  vector[K] beta;      // coef vector
+  real<lower=0> sigma; // scale parameter
+}
+
+model {
+  // local variables
+  vector[N] eta;  // declare lin. pred.
+  eta = x * beta; // assign lin. pred.
+
+  // priors
+  target += normal_lpdf(beta | 0, 10);  // priors for beta
+  target += cauchy_lpdf(sigma | 0, 5);  // prior for sigma
+  
+  // log-likelihood
+  target += normal_lpdf(y | eta, sigma); // likelihood
+}
+```
+
+```{stan logit1-solution, eval=eval_learnr_sol, echo=echo_sol, output.var = "none"}
+data {
+  int<lower=1> N;                  // num. observations
+  int<lower=1> K;                  // num. predictors
+  matrix[N, K] x;                  // model matrix
+  array[N] int<lower=0,upper=1> y; // outcome
+}
+
+parameters {
+  vector[K] beta;      // coef vector
+}
+
+model {
+  // local variables
+  vector[N] eta;  // declare lin. pred.
+  eta = x * beta; // assign lin. pred.
+
+  // priors
+  target += normal_lpdf(beta | 0, 10);  // priors for beta
+
+  // log-likelihood
+  target += bernoulli_logit_lpmf(y | eta); // likelihood, incl. inverse link
+}
+```
+
+### Extension 1: Varying intercepts
+
+- Extending our model to become a hierarchical varying-intercept model is easy.
+- All we need to do is extend the linear predictor with a group-specific zero-mean random effect:
+
+$$
+y_{ij} \sim \text{Bernoulli}(\text{logit}^{-1}(\mathbf{x}_i^{\prime} \beta + \nu_{j_{[i]}})) \\
+\nu_j \sim \text{Normal}(0, \sigma_{\nu})
+$$
+
+- We accomplish this by adding a standard normal parameter in the `parameters` block, and scaling it in the `transformed parameters` block. 
+- Note that the choice of the normal distribution is arbitrary: We could change the distribution of these "random deviation" from the intercept in any (plausible) way we like.
+- Of course, we also need an integer array that indicates each unit's group membership.
+
+### Varying-intercepts logit model: Code
+
+```{stan logit2, output.var = "none", echo = TRUE, eval = F}
+data {
+  int<lower=1> N;                    // num. observations
+  int<lower=1> K;                    // num. predictors
+  int<lower=1> J;                    // num. groups
+  array[N] int<lower=1, upper=J> jj; // group index
+  matrix[N, K] x;                    // model matrix
+  array[N] int<lower=0, upper=1> y;  // outcome
+}
+
+parameters {
+  vector[K] beta;          // coef vector
+  vector[J] nu_raw;        // unscaled random effect
+  real<lower=0> sigma_nu;  // scale of random effect
+}
+
+transformed parameters {
+  vector[J] nu;            // scaled random effect
+  nu = nu_raw * sigma_nu;
+}
+
+model {
+  // local variables
+  vector[N] eta;
+  
+  eta = x * beta + nu[jj];                  // linear predictor
+
+  // priors
+  target += normal_lpdf(beta | 0, 10);      // priors for beta
+  target += normal_lpdf(nu_raw | 0, 1);     // priors for nu_raw
+  target += cauchy_lpdf(sigma_nu | 0, 5);   // prior for scale of nu
+
+  // log-likelihood
+  target += bernoulli_logit_lpmf(y | eta); // likelihood, incl. inverse link
+}
+```
+
+
+### Extension 2: Varying intercepts, varying slopes
+
+- Extending our model to become a hierarchical varying-intercept, vary-slopes model where intercepts and slopes are mutually correlated is a bit more intricate.
+- Suppose we would like to have a varying slope for one variable, $x$, but none for all other covariates $\mathbf{z}$. 
+- Defining $\mathbf{x}^{\prime} = \begin{bmatrix} 1 & x_i \end{bmatrix}$, this yields the following model:
+
+$$
+y_{ij} \sim \text{Bernoulli}(\text{logit}^{-1}(\mathbf{x}_i^{\prime} \beta_{j_{[i]}} + \mathbf{z} _i^{\prime} \gamma)) \\
+\beta_{1j} = \beta_1 + \nu_{1j} \\
+\beta_{2j} = \beta_2 + \nu_{2j} \\
+\begin{bmatrix} \nu_{1j} \\ \nu_{2j} \end{bmatrix} \sim \text{MVN}\left( \begin{bmatrix} 0 \\ 0 \end{bmatrix}, \Sigma_{\nu} \right)
+$$
+
+- This is exactly the form in which we implement the model below.
+- We use a little efficiency trick for the variance covariance matrix of $\nu$:
+    - We decompose the variance covariance matrix into:
+        - A Cholesky correlation factor $\Omega$ with a Cholesky LKJ correlation prior
+        - A scale vector $\tau$
+    - We then use both components in the `transformed parameters` block to retrieve the variance-covariance matrix $\Sigma_{nu}$.
+
+### Varying-intercepts, varying slopes logit model: Code
+
+```{stan logit3, output.var = "none", echo = TRUE, eval = F}
+data {
+  int<lower=1> N;                      // num. observations
+  int<lower=1> K;                      // num. predictors w. varying coefs
+  int<lower=1> L;                      // num. predictors w. fixed coefs
+  int<lower=1> J;                      // num. groups
+  array[N] int<lower=1, upper=J> jj;   // group index
+  matrix[N, K] x;                      // matrix varying predictors, incl. intercept
+  matrix[N, L] z;                      // matrix fixed predictors, excl. intercept
+  array[N] int<lower=0, upper=1> y;    // outcome
+}
+
+transformed data {
+  row_vector[K] zeroes;               // a length-K row vector of 0's
+  zeroes = rep_row_vector(0.0, K);
+}
+
+parameters {
+  // Fixed portions
+  vector[K] beta;      // fixed coef predictors w. varying coefs
+  vector[L] gamma;     // fixed coef predictors w. fixed coefs
+  
+  // Random portions
+  array[J] vector[K] nu;            // group-specific deviations
+  cholesky_factor_corr[K] L_Omega;  // prior correlation of deviations
+  vector<lower=0>[K] tau;           // prior scale of deviations
+}
+
+transformed parameters {
+  // Variance-covariance matrix of random deviatons
+  matrix[K,K] Sigma;
+  Sigma = diag_pre_multiply(tau, L_Omega) * diag_pre_multiply(tau, L_Omega)';
+}
+
+model {
+  // local variables
+  vector[N] eta;
+  
+  // linear predictor
+  eta = x * beta + z * gamma;               // lin. pred. without random effect
+  for (i in 1:N) {
+    eta[i] = eta[i] + x[i, ] * nu[jj[i]];   // add group-specific random effects
+  }
+  
+  // priors
+  target += normal_lpdf(beta | 0, 10);               // priors for beta
+  target += normal_lpdf(gamma | 0, 10);              // priors for gamma
+  target += cauchy_lpdf(tau | 0, 5);                 // prior for scales of nu
+  target += lkj_corr_cholesky_lpdf(L_Omega | 2.0);   // Cholesky LJK corr. prior
+  target += multi_normal_lpdf(nu | zeroes, Sigma);   // nu
+
+
+  // log-likelihood
+  target += bernoulli_logit_lpmf(y | eta); // likelihood, incl. inverse link
+}
+```
+
+### Transferability to other GLM
+
+The specification of univariate or multivariate random effects is fairly general. It does not depend on a specific type of GLM. 
+
+You could equally use the respective code chunks in a linear model or a tobit model, for instance. This is an example of modular model building.
+
+## Exercise
+
+### Prompt
+
+We now want to apply the varying intercept, varying slope logit model to our running example of vote choice for the AfD.
+
+Specifically, we want to know whether anti-immigration preferences predict voting for the AfD more strongly among respondents in Bundesländer where the immigrant population is large.
+
+### An explicit multi-level notation
+
+To make the multi-level structure of our model explicit, we can use a two-level notation for the linear predictor:
+
+$$
+\begin{split}
+\eta_{ij} & = \beta_{1j} + \beta_{2j} \mathtt{la\_self}_i  \\
+\beta_{1j} & = \beta_1 + \gamma_{1} \mathtt{bl\_immig}_j + \nu_{j1} \\
+\beta_{2j} & = \beta_2 + \gamma_{2} \mathtt{bl\_immig}_j + \nu_{j2}
+\end{split}
+$$
+The level-two equations show how we want to use the context-level variable $\mathtt{bl\_immig}_j$ to explain the variability in our varying intercepts and slopes.
+
+Rearranging into a single equation yields
+
+$$\begin{split}
+\eta_{ij} & = \beta_1 + \gamma_{1} \mathtt{bl\_immig}_j + \nu_{j1} + (\beta_2 + \gamma_{2} \mathtt{bl\_immig}_j + \nu_{j2}) \mathtt{la\_self}_i + \epsilon_i \\
+\eta_{ij} & = \beta_1 + \gamma_{1} \mathtt{bl\_immig}_j + \nu_{j1} + \beta_2 \mathtt{la\_self}_i + \gamma_{2} \mathtt{bl\_immig}_j \mathtt{la\_self}_i + \nu_{j2} \mathtt{la\_self}_i  + \epsilon_i \\
+\eta_{ij} & = \beta_1 + \underbrace{\beta_2 \mathtt{la\_self}_i + \gamma_{1} \mathtt{bl\_immig}_j + \gamma_{2} \mathtt{bl\_immig}_j \mathtt{la\_self}_i}_{\text{interaction}} + \underbrace{\epsilon_i + \nu_{j1} + \nu_{j2} \mathtt{la\_self}_i}_{\text{composite errors}}
+\end{split}$$
+
+This is why we also call this a model with a *cross-level interaction*.
+
+
+### Compilation
+
+```{r compilation, eval = FALSE, echo = TRUE}
+# Model code
+rslogit_code <- "data {
+  int<lower=1> N;                      // num. observations
+  int<lower=1> K;                      // num. predictors w. varying coefs
+  int<lower=1> L;                      // num. predictors w. fixed coefs
+  int<lower=1> J;                      // num. groups
+  array[N] int<lower=0, upper=J> jj;   // group index
+  matrix[N, K] x;                      // matrix varying predictors, incl. intercept
+  matrix[N, L] z;                      // matrix fixed predictors, excl. intercept
+  array[N] int<lower=0, upper=1> y;    // outcome
+}
+
+transformed data {
+  row_vector[K] zeroes;
+  zeroes = rep_row_vector(0.0, K);
+}
+
+parameters {
+  // Fixed portions
+  vector[K] beta;      // fixed coef predictors w. varying coefs
+  vector[L] gamma;     // fixed coef predictors w. fixed coefs
+  
+  // Random portions
+  array[J] vector[K] nu;            // group-specific zero-mean deviations
+  cholesky_factor_corr[K] L_Omega;  // prior correlation of deviations
+  vector<lower=0>[K] tau;           // prior scale of deviations
+}
+
+transformed parameters {
+  // Variance-covariance matrix of random deviatons
+  matrix[K,K] Sigma;
+  Sigma = diag_pre_multiply(tau, L_Omega) * diag_pre_multiply(tau, L_Omega)';
+}
+
+model {
+  // local variables
+  vector[N] eta;
+  
+  // linear predictor
+  eta = x * beta + z * gamma;               // lin. pred. without random effect
+  for (i in 1:N) {
+    eta[i] = eta[i] + x[i, ] * nu[jj[i]];   // add group-specific random effects
+  }
+  
+  // priors
+  target += normal_lpdf(beta | 0, 2.5);             // priors for beta
+  target += normal_lpdf(gamma | 0, 2.5);            // priors for gamma
+  target += cauchy_lpdf(tau | 0, 2.5);               // prior for scales of nu
+  target += lkj_corr_cholesky_lpdf(L_Omega | K);   // Cholesky LJK corr. prior
+  target += multi_normal_lpdf(nu | zeroes, Sigma); // nu
+
+
+  // log-likelihood
+  target += bernoulli_logit_lpmf(y | eta); // likelihood
+}"
+
+# C++ Compilation
+rslogit_mod <- rstan::stan_model(model_code = rslogit_code)
+```
+
+
+### Data
+
+In order to specify the model in the form given above, we need two model matrices:
+
+- $\mathbf{X}_{N\times2}$ accommodates a leading column of 1's and `la_self`
+- $\mathbf{Z}_{N\times2}$ accommodates a `bl_immig` and the product term `bl_immig:la_self`
+
+Generate these, and all other required inputs below:
+
+```{r data, exercise = TRUE, eval=eval_ex}
+# Define data objects
+y <- ...
+x <- ...
+z <- ...
+z <- ...
+jj <- ...
+J <- ...
+N <- ...
+K <- ...
+L <- ...
+
+# Bind in a named list
+standat_rslogit <- list(
+  y = y,
+  x = x,
+  z = z,
+  jj = jj,
+  J = J,
+  N = N,
+  K = K,
+  L = L
+)
+```
+
+```{r data-solution, eval=eval_sol, echo=echo_sol, output.var = "none"}
+# Define data objects
+y <- gles$vote_afd
+x <- model.matrix(~la_self, data = gles)
+z <- model.matrix(~bl_immig + bl_immig:la_self, data = gles)
+z <- z[, 2:ncol(z)]
+jj <- as.integer(gles$bl)
+J <- length(unique(jj))
+N <- nrow(x)
+K <- ncol(x)
+L <- ncol(z)
+
+# Bind in a named list
+standat_rslogit <- list(
+  y = y,
+  x = x,
+  z = z,
+  jj = jj,
+  J = J,
+  N = N,
+  K = K,
+  L = L
+)
+```
+
+### Inference
+
+We can fit the model using the following code:
+
+```{r fit, eval = FALSE, echo=TRUE}
+rslogit_est <- rstan::sampling(
+  rslogit_mod,               
+  data = standat_rslogit,         
+  algorithm = "NUTS",
+  control = list(
+    max_treedepth = 15,
+    adapt_delta = 0.9
+  ),
+  pars = c("beta", "gamma", "Sigma", "nu"),  
+  iter = 8000L,               
+  warmup = 4000L,             
+  thin = 4L,                  
+  chains = 2L,                
+  cores = 2L,                 
+  seed = 20210330)   
+```
+
+As we know, the model is quite demanding. We are already doing quite a bit to ensure the validity of our estimates. In effort to avoid divergent transitions, non-convergence or poor mixing of chains, or low effective sample sizes due to high autocorrelation, we:
+
+- run our chains for `iter = 8000L` iterations, of which we discard the first half as warmup.
+- increase the algorithm control arguments `max_treedepth` and `adapt_delta`
+
+The result is that the model shows no obvious signs of algorithm failure but takes quite some time to run (on my machine, approx. 20 minutes).
+
+Therefore, we will not run it as part of this exercise; instead, you can directly assess the `stanfit` object in the next task.
+
+### Model results and convergence diagnosis
+
+Run the code to print the model summary. Do the generic diagnostics show any signs of non-convergence?
+
+```{r print, exercise = TRUE, eval=eval_ex}
+print(rslogit_est, 
+      pars = c("beta", "gamma", "Sigma"),
+      digits = 4L)
+```
+
+```{r print-solution, eval=eval_sol, echo=echo_sol, output.var = "none"}
+print(rslogit_est, 
+      pars = c("beta", "gamma", "Sigma"),
+      digits = 4L)
+```
+
+
+Use the [bayesplot](https://mc-stan.org/bayesplot/articles/visual-mcmc-diagnostics.html) package to try out some cool visual diagnostics.
+
+```{r visualize, exercise = TRUE, eval=eval_ex, exercise.lines = 20}
+```
+
+```{r visualize-solution, eval=eval_sol, echo=echo_sol, output.var = "none"}
+# See the package vignette for inspiration
+```
+
+## Quantities of interest
+
+### Conditional average marginal effects
+
+We are now going to calculate our most challenging quantity of interest yet: The *conditional average marginal effect* of $\mathtt{la\_self}$ on  $\Pr(\mathtt{vote\_afd})$.
+
+This quantity of interest is vastly similar to the average marginal effect from Lab 2. But since our predictor $\mathtt{la\_self}$ is interacted with the variable $\mathtt{bl\_immig}$, the marginal effect will change along the scale of $\mathtt{bl\_immig}$. The general intuition (in the context of OLS models) is explained by [Brambor, Clark, and Golder (2006)](https://www.jstor.org/stable/25791835#metadata_info_tab_contents).
+
+The conditional average marginal effect for a one unit increase in $\mathtt{la\_self}$ at any given value of $\mathtt{bl\_immig}^{\ast}$ is defined as:
+
+$$\frac{1}{N} \sum_{i=1}^{N} \left\{ \text{logit}^{-1}(\beta_1 + \beta_2 (\mathtt{la\_self}_i + 1) + \gamma_1 \mathtt{bl\_immig}^{\ast} + \gamma_2 (\mathtt{la\_self}_i + 1) \times \mathtt{bl\_immig}^{\ast}) \\ - \text{logit}^{-1}(\beta_1 + \beta_2 \mathtt{la\_self}_i  + \gamma_1 \mathtt{bl\_immig}^{\ast} + \gamma_2 \mathtt{la\_self}_i \times \mathtt{bl\_immig}^{\ast}) \right\}$$
+
+Of course, we do not simply want the average marginal value conditional on a single value of  $\mathtt{bl\_immig}^{\ast}$ but on a *sequence of values* of $\mathtt{bl\_immig}^{\ast}$. This will allow us to see how the marginal effect changes along the values of the moderator.
+
+### Calculate the QOI
+
+```{r qoi, exercise = TRUE, eval=eval_ex, exercise.lines = 30}
+# Extract the model parameters
+pars <- rstan::extract(rslogit_est)
+
+# Extract the model matrices from standat_rslogit
+X0 <- X1 <- standat_rslogit$x
+Z0 <- Z1 <- standat_rslogit$z
+X1[, "la_self"] <- X1[, "la_self"] + 1
+
+
+# Define value sequence for bl_immig (approx range: 1-4)
+bl_immig_vals <- seq(1, 4, 0.1)
+
+# Initialize container (for posterior median, 2.5 and 97.5 percentiles)
+came <- array(NA, dim = c(length(bl_immig_vals), 3L))
+
+# Start loop
+for (i in seq_along(bl_immig_vals)) {
+  # Manipulate z matrices
+  Z0[, c("bl_immig", "bl_immig:la_self")] <- ...
+  Z1[, c("bl_immig", "bl_immig:la_self")] <- ...
+  
+  # Get unit-specific linear predictors
+  eta0 <- ...
+  eta1 <- .
+  
+  # Get unit-specific conditional marginal effects
+  cme <- plogis(eta1) - plogis(eta0)
+  
+  # Average across observations, take quantiles
+  ...
+}
+
+# Export newly created objects to global environment
+export(environment())
+```
+
+```{r qoi-solution, eval=eval_sol, echo=echo_sol, output.var = "none"}
+# Extract the model parameters
+pars <- posterior::as_draws_matrix(rslogit_est)
+beta <- posterior::subset_draws(pars, variable = "beta")
+gamma <- posterior::subset_draws(pars, variable = "gamma")
+
+# Extract the model matrices from standat_rslogit
+X0 <- X1 <- standat_rslogit$x
+Z0 <- Z1 <- standat_rslogit$z
+X1[, "la_self"] <- X1[, "la_self"] + 1
+
+# Define value sequence for bl_immig (approx range: 1-4)
+bl_immig_vals <- seq(1, 4, 0.1)
+
+# Initialize container (for posterior median, 2.5 and 97.5 percentiles)
+came <- array(NA, dim = c(length(bl_immig_vals), 3L))
+
+# Start loop
+for (i in seq_along(bl_immig_vals)) {
+  # Manipulate z matrices
+  Z0[, c("bl_immig", "bl_immig:la_self")] <-
+    cbind(bl_immig_vals[i], bl_immig_vals[i] * X0[, "la_self"])
+  Z1[, c("bl_immig", "bl_immig:la_self")] <-
+    cbind(bl_immig_vals[i], bl_immig_vals[i] * X1[, "la_self"])
+  
+  # Get unit-specific linear predictors
+  eta0 <- X0 %*% t(beta) + Z0 %*% t(gamma)
+  eta1 <- X1 %*% t(beta) + Z1 %*% t(gamma)
+  
+  # Get unit-specific conditional marginal effects
+  cme <- plogis(eta1) - plogis(eta0)
+  
+  # Average across observations, take quantiles
+  came[i, ] <- quantile(apply(cme, 2, mean), c(.5, .025, .975))
+}
+
+# Export newly created objects to global environment
+export(environment())
+```
+
+### Visualization
+
+```{r visualize2, exercise = TRUE, eval=eval_ex, exercise.lines = 65}
+# Plot
+## Auxiliary objects
+x_lines <-  seq(1, 4, .5)
+y_lines <- seq(0, .125, .025)
+
+## Canvas
+plot(
+  1,
+  1,
+  type = 'n',
+  main = paste("Conditonal Average Marginal Efffect",
+               sep = "\n"),
+  axes = F,
+  xlab = "Bundesland-level immigration rate",
+  ylab = "AME on Pr(Vote AfD)",
+  ylim = range(y_lines),
+  xlim = range(x_lines)
+)
+axis(2, outer = FALSE)
+axis(1)
+rect(
+  min(x_lines),
+  min(y_lines),
+  max(x_lines),
+  max(y_lines),
+  col = "gray95",
+  border = NA
+)
+for (y in y_lines)
+  segments(min(x_lines),
+           y,
+           max(x_lines),
+           y,
+           col = "white",
+           lwd = 2)
+for (x in x_lines)
+  segments(x,
+           min(y_lines),
+           x,
+           max(y_lines),
+           col = "white",
+           lwd = 2)
+
+## Prediction
+polygon(
+  c(bl_immig_vals, rev(bl_immig_vals)),
+  c(
+    came[, 2],
+    rev(came[, 3])
+  ),
+  col = adjustcolor("gray30", alpha.f = .2),
+  border = NA
+)
+lines(bl_immig_vals,
+      came[, 1],
+      lty = 1,
+      col = "gray10",
+      lwd = 2)
+lines(bl_immig_vals,
+      came[, 2],
+      lty = 1,
+      col = "gray30")
+lines(bl_immig_vals,
+      came[ ,3],
+      lty = 1,
+      col = "gray30")
+```
+
+```{r visualize2-solution, eval=eval_sol, echo=echo_sol, output.var = "none"}
+# Plot
+## Auxiliary objects
+x_lines <-  seq(1, 4, .5)
+y_lines <- seq(0, .125, .025)
+
+## Canvas
+plot(
+  1,
+  1,
+  type = 'n',
+  main = paste("Conditonal Average Marginal Efffect",
+               sep = "\n"),
+  axes = F,
+  xlab = "Bundesland-level immigration rate",
+  ylab = "AME on Pr(Vote AfD)",
+  ylim = range(y_lines),
+  xlim = range(x_lines)
+)
+axis(2, outer = FALSE)
+axis(1)
+rect(
+  min(x_lines),
+  min(y_lines),
+  max(x_lines),
+  max(y_lines),
+  col = "gray95",
+  border = NA
+)
+for (y in y_lines)
+  segments(min(x_lines),
+           y,
+           max(x_lines),
+           y,
+           col = "white",
+           lwd = 2)
+for (x in x_lines)
+  segments(x,
+           min(y_lines),
+           x,
+           max(y_lines),
+           col = "white",
+           lwd = 2)
+
+## Prediction
+polygon(
+  c(bl_immig_vals, rev(bl_immig_vals)),
+  c(
+    came[, 2],
+    rev(came[, 3])
+  ),
+  col = adjustcolor("gray30", alpha.f = .2),
+  border = NA
+)
+lines(bl_immig_vals,
+      came[, 1],
+      lty = 1,
+      col = "gray10",
+      lwd = 2)
+lines(bl_immig_vals,
+      came[, 2],
+      lty = 1,
+      col = "gray30")
+lines(bl_immig_vals,
+      came[ ,3],
+      lty = 1,
+      col = "gray30")
+```
+
+### Follow-up
+
+Suppose you have included this plot in a submission. Reviewer 2 remarks that it is interesting to see that the average effect of a one-point increase in anti-immigration preferences on AfD voting more than doubles along the scale of state-level immigration rates. However, they point out that the credible intervals at the two ends of the $x$-axis widely overlap and, therefore, wonder if the reported effect modification is truly systematic.
+
+Modify the code you used to compute the conditional average effect  to report the probability that the average effect of a one-point increase in anti-immigration preferences is greater when the state-level immigration rate is at its maximum as opposed to its minimum value.
+
+```{r qoi2, exercise = TRUE, eval=eval_ex, exercise.lines = 36}
+
+```
+
+```{r qoi2-solution, eval=eval_sol, echo=echo_sol, output.var = "none"}
+# Extract the model parameters
+pars <- posterior::as_draws_matrix(rslogit_est)
+beta <- posterior::subset_draws(pars, variable = "beta")
+gamma <- posterior::subset_draws(pars, variable = "gamma")
+
+# Extract the model matrices from standat_rslogit
+X0 <- X1 <- standat_rslogit$x
+Z0 <- Z1 <- standat_rslogit$z
+X1[, "la_self"] <- X1[, "la_self"] + 1
+
+# Get min/max values of bl_immig
+bl_immig_vals <- range(standat_rslogit$z[, 1])
+
+# Initialize container (for full posterior)
+came <- array(NA, dim = c(length(bl_immig_vals), nrow(beta)))
+
+# Start loop
+for (i in seq_along(bl_immig_vals)) {
+  # Manipulate z matrices
+  Z0[, c("bl_immig", "bl_immig:la_self")] <-
+    cbind(bl_immig_vals[i], bl_immig_vals[i] * X0[, "la_self"])
+  Z1[, c("bl_immig", "bl_immig:la_self")] <-
+    cbind(bl_immig_vals[i], bl_immig_vals[i] * X1[, "la_self"])
+  
+  # Get unit-specific linear predictors
+  eta0 <- X0 %*% t(beta) + Z0 %*% t(gamma)
+  eta1 <- X1 %*% t(beta) + Z1 %*% t(gamma)
+  
+  # Get unit-specific probabilities
+  pi0 <- plogis(eta0)
+  pi1 <- plogis(eta1)
+
+  # Get unit-specific conditional marginal effects
+  cme <- pi1 - pi0
+  
+  # Average across observations
+  came[i, ] <- apply(cme, 2, mean)
+}
+
+# Report probability of interest
+mean(came[2, ] > came[1, ])
+```

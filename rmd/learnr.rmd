@@ -13,10 +13,6 @@ editor_options:
 
 ```{r, echo=FALSE, message = FALSE, warning = FALSE}
 ## --- Options ---
-eval_ex <- TRUE
-eval_sol <- TRUE
-eval_learnr <- TRUE
-
 knitr::opts_chunk$set(message = FALSE,
                       warning = FALSE)
 
@@ -26,11 +22,22 @@ if ("learnr" %in% (.packages()))
 library(learnr)
 ```
 
+```{r, echo=FALSE}
+## --- Options ---
+eval_ex <- TRUE
+eval_sol <- TRUE
+echo_sol <- FALSE
+eval_learnr <- TRUE
+eval_learnr_sol <- TRUE
+```
+
 ```{r, echo=FALSE, context="server"}
 ## --- Options ---
 eval_ex <- TRUE
 eval_sol <- TRUE
+echo_sol <- FALSE
 eval_learnr <- TRUE
+eval_learnr_sol <- TRUE
 ```
 
 <<"{{content}}">>
