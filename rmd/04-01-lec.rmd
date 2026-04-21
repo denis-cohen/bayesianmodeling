@@ -773,7 +773,9 @@ Of course, we do not simply want the average marginal value conditional on a sin
 
 ```{r qoi, exercise = TRUE, eval=eval_ex, exercise.lines = 30}
 # Extract the model parameters
-pars <- rstan::extract(rslogit_est)
+pars <- posterior::as_draws_matrix(rslogit_est)
+beta <- posterior::subset_draws(pars, variable = "beta")
+gamma <- posterior::subset_draws(pars, variable = "gamma")
 
 # Extract the model matrices from standat_rslogit
 X0 <- X1 <- standat_rslogit$x
@@ -795,10 +797,14 @@ for (i in seq_along(bl_immig_vals)) {
   
   # Get unit-specific linear predictors
   eta0 <- ...
-  eta1 <- .
+  eta1 <- ...
+
+  # Get unit-specific probabilities
+  pi0 <- ...
+  pi1 <- ...
   
   # Get unit-specific conditional marginal effects
-  cme <- plogis(eta1) - plogis(eta0)
+  cme <- pi1 - pi0
   
   # Average across observations, take quantiles
   ...
@@ -837,6 +843,10 @@ for (i in seq_along(bl_immig_vals)) {
   eta0 <- X0 %*% t(beta) + Z0 %*% t(gamma)
   eta1 <- X1 %*% t(beta) + Z1 %*% t(gamma)
   
+  # Get unit-specific probabilities
+  pi0 <- plogis(eta0)
+  pi1 <- plogis(eta1)
+
   # Get unit-specific conditional marginal effects
   cme <- plogis(eta1) - plogis(eta0)
   

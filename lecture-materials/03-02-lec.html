@@ -1843,24 +1843,16 @@ true_pars</code></pre>
 ## 2 chains, each with iter=2000; warmup=1000; thin=2; 
 ## post-warmup draws per chain=500, total post-warmup draws=1000.
 ## 
-##             mean se_mean   sd     2.5%      25%      50%      75%    97.5%
-## beta[1]    -0.62    0.00 0.08    -0.78    -0.67    -0.62    -0.56    -0.45
-## beta[2]    -1.05    0.00 0.08    -1.20    -1.11    -1.05    -1.00    -0.90
-## beta[3]    -1.50    0.00 0.08    -1.65    -1.55    -1.50    -1.45    -1.35
-## beta[4]     0.34    0.00 0.08     0.18     0.29     0.34     0.39     0.49
-## beta[5]     2.49    0.00 0.08     2.34     2.43     2.49     2.54     2.64
-## sigma       2.54    0.00 0.06     2.43     2.49     2.53     2.57     2.65
-## lp__    -2366.95    0.06 1.75 -2370.99 -2367.87 -2366.59 -2365.73 -2364.62
-##         n_eff Rhat
-## beta[1]   893    1
-## beta[2]   925    1
-## beta[3]   882    1
-## beta[4]  1065    1
-## beta[5]   882    1
-## sigma     994    1
-## lp__      754    1
+##             mean se_mean   sd     2.5%      25%      50%      75%    97.5% n_eff Rhat
+## beta[1]    -0.62    0.00 0.08    -0.78    -0.67    -0.62    -0.56    -0.45   893    1
+## beta[2]    -1.05    0.00 0.08    -1.20    -1.11    -1.05    -1.00    -0.90   925    1
+## beta[3]    -1.50    0.00 0.08    -1.65    -1.55    -1.50    -1.45    -1.35   882    1
+## beta[4]     0.34    0.00 0.08     0.18     0.29     0.34     0.39     0.49  1065    1
+## beta[5]     2.49    0.00 0.08     2.34     2.43     2.49     2.54     2.64   882    1
+## sigma       2.54    0.00 0.06     2.43     2.49     2.53     2.57     2.65   994    1
+## lp__    -2366.95    0.06 1.75 -2370.99 -2367.87 -2366.59 -2365.73 -2364.62   754    1
 ## 
-## Samples were drawn using NUTS(diag_e) at Mon Apr 20 23:09:13 2026.
+## Samples were drawn using NUTS(diag_e) at Tue Apr 21 09:00:15 2026.
 ## For each parameter, n_eff is a crude measure of effective sample size,
 ## and Rhat is the potential scale reduction factor on split chains (at 
 ## convergence, Rhat=1).</code></pre>
@@ -1932,7 +1924,7 @@ such validation simulations.</li>
 ##   .. .. .. ..- attr(*, &quot;mean_pars&quot;)= num [1:1006] -0.614 -1.053 -1.498 0.334 2.488 ...
 ##   .. .. .. ..- attr(*, &quot;mean_lp__&quot;)= num -2367
 ##   .. .. .. ..- attr(*, &quot;adaptation_info&quot;)= chr &quot;# Adaptation terminated\n# Step size = 0.740912\n# Diagonal elements of inverse mass matrix:\n# 0.00567076, 0.0&quot;| __truncated__
-##   .. .. .. ..- attr(*, &quot;elapsed_time&quot;)= Named num [1:2] 0.626 0.531
+##   .. .. .. ..- attr(*, &quot;elapsed_time&quot;)= Named num [1:2] 0.284 0.271
 ##   .. .. .. .. ..- attr(*, &quot;names&quot;)= chr [1:2] &quot;warmup&quot; &quot;sample&quot;
 ##   .. .. .. ..- attr(*, &quot;sampler_params&quot;)=List of 6
 ##   .. .. .. .. ..$ accept_stat__: num [1:500] 0.741 0.968 0.884 0.79 0.791 ...
@@ -1984,7 +1976,7 @@ such validation simulations.</li>
 ##   .. .. .. ..- attr(*, &quot;mean_pars&quot;)= num [1:1006] -0.617 -1.054 -1.506 0.339 2.49 ...
 ##   .. .. .. ..- attr(*, &quot;mean_lp__&quot;)= num -2367
 ##   .. .. .. ..- attr(*, &quot;adaptation_info&quot;)= chr &quot;# Adaptation terminated\n# Step size = 0.680131\n# Diagonal elements of inverse mass matrix:\n# 0.00755478, 0.0&quot;| __truncated__
-##   .. .. .. ..- attr(*, &quot;elapsed_time&quot;)= Named num [1:2] 0.665 0.459
+##   .. .. .. ..- attr(*, &quot;elapsed_time&quot;)= Named num [1:2] 0.267 0.261
 ##   .. .. .. .. ..- attr(*, &quot;names&quot;)= chr [1:2] &quot;warmup&quot; &quot;sample&quot;
 ##   .. .. .. ..- attr(*, &quot;sampler_params&quot;)=List of 6
 ##   .. .. .. .. ..$ accept_stat__: num [1:500] 0.954 0.983 0.884 0.801 0.549 ...
@@ -2001,8 +1993,8 @@ such validation simulations.</li>
 ##   .. ..$ n_save     : num [1:2] 500 500
 ##   .. ..$ warmup2    : int [1:2] 0 0
 ##   .. ..$ permutation:List of 2
-##   .. .. ..$ : int [1:500] 356 117 235 475 316 359 49 409 218 89 ...
-##   .. .. ..$ : int [1:500] 151 217 208 1 487 81 369 83 100 277 ...
+##   .. .. ..$ : int [1:500] 242 11 151 474 252 448 258 404 70 272 ...
+##   .. .. ..$ : int [1:500] 291 461 14 30 135 368 433 55 377 112 ...
 ##   .. ..$ pars_oi    : chr [1:3] &quot;beta&quot; &quot;sigma&quot; &quot;lp__&quot;
 ##   .. ..$ dims_oi    :List of 3
 ##   .. .. ..$ beta : num 5
@@ -2049,20 +2041,20 @@ such validation simulations.</li>
 ##   .. .. ..@ model_code  : chr &quot;data {\n  int&lt;lower=1&gt; N; // num. observations\n  int&lt;lower=1&gt; K; // num. predictors\n  matrix[N, K] x; // desi&quot;| __truncated__
 ##   .. .. .. ..- attr(*, &quot;model_name2&quot;)= chr &quot;588ca2cbb3192e0c02e3ac3c93d08797&quot;
 ##   .. .. ..@ model_cpp   :List of 2
-##   .. .. .. ..$ model_cppname: chr &quot;model69830e5148_&quot;
+##   .. .. .. ..$ model_cppname: chr &quot;model75b827fc61af_&quot;
 ##   .. .. .. ..$ model_cppcode: chr &quot;#ifndef MODELS_HPP\n#define MODELS_HPP\n#define STAN__SERVICES__COMMAND_HPP\n#include &lt;rstan/rstaninc.hpp&gt;\n#if&quot;| __truncated__
 ##   .. .. ..@ mk_cppmodule:function (object)  
 ##   .. .. ..@ dso         :Formal class &#39;cxxdso&#39; [package &quot;rstan&quot;] with 7 slots
 ##   .. .. .. .. ..@ sig         :List of 1
-##   .. .. .. .. .. ..$ file698512b3903: chr(0) 
+##   .. .. .. .. .. ..$ file75b83f2f3275: chr(0) 
 ##   .. .. .. .. ..@ dso_saved   : logi TRUE
-##   .. .. .. .. ..@ dso_filename: chr &quot;file698512b3903&quot;
-##   .. .. .. .. ..@ modulename  : chr &quot;stan_fit4model69830e5148__mod&quot;
+##   .. .. .. .. ..@ dso_filename: chr &quot;file75b83f2f3275&quot;
+##   .. .. .. .. ..@ modulename  : chr &quot;stan_fit4model75b827fc61af__mod&quot;
 ##   .. .. .. .. ..@ system      : chr &quot;x86_64, mingw32&quot;
 ##   .. .. .. .. ..@ cxxflags    : chr &quot;CXXFLAGS = -O2 -Wall $(DEBUGFLAG) -mfpmath=sse -msse2 -mstackrealign $(LTO)&quot;
-##   .. .. .. .. ..@ .CXXDSOMISC :&lt;environment: 0x000002184e4a1a58&gt; 
-##   ..@ date      : chr &quot;Mon Apr 20 23:09:13 2026&quot;
-##   ..@ .MISC     :&lt;environment: 0x0000021821d0d328&gt;</code></pre>
+##   .. .. .. .. ..@ .CXXDSOMISC :&lt;environment: 0x000001ceeefa2518&gt; 
+##   ..@ date      : chr &quot;Tue Apr 21 09:00:15 2026&quot;
+##   ..@ .MISC     :&lt;environment: 0x000001cee8aabb28&gt;</code></pre>
 </div>
 </div>
 <div id="inference" class="section level2" number="5">
@@ -2151,7 +2143,7 @@ indicator.</p>
 ## beta[2] -0.114   0.003 0.074 -0.266 -0.163 -0.109 -0.064 0.026   806 0.998
 ## sigma    1.240   0.001 0.022  1.198  1.224  1.240  1.255 1.282  1068 0.999
 ## 
-## Samples were drawn using NUTS(diag_e) at Mon Apr 20 23:09:30 2026.
+## Samples were drawn using NUTS(diag_e) at Tue Apr 21 09:00:25 2026.
 ## For each parameter, n_eff is a crude measure of effective sample size,
 ## and Rhat is the potential scale reduction factor on split chains (at 
 ## convergence, Rhat=1).</code></pre>

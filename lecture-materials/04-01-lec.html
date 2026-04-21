@@ -2247,24 +2247,15 @@ show any signs of non-convergence?</p>
 ## 4 chains, each with iter=8000; warmup=4000; thin=8; 
 ## post-warmup draws per chain=500, total post-warmup draws=2000.
 ## 
-##               mean se_mean     sd    2.5%     25%     50%     75%   97.5%
-## beta[1]    -1.3092  0.0292 1.2809 -3.8337 -2.1479 -1.3262 -0.4458  1.2204
-## beta[2]    -0.0345  0.0036 0.1597 -0.3591 -0.1371 -0.0328  0.0761  0.2627
-## gamma[1]   -2.2311  0.0155 0.6742 -3.6310 -2.6839 -2.2026 -1.7777 -0.9455
-## gamma[2]    0.2479  0.0019 0.0823  0.0969  0.1913  0.2454  0.3029  0.4208
-## Sigma[1,1]  0.2444  0.0133 0.4355  0.0005  0.0254  0.1105  0.2895  1.3953
-## Sigma[1,2] -0.0123  0.0014 0.0471 -0.1006 -0.0098 -0.0012  0.0010  0.0095
-## Sigma[2,1] -0.0123  0.0014 0.0471 -0.1006 -0.0098 -0.0012  0.0010  0.0095
-## Sigma[2,2]  0.0047  0.0003 0.0083  0.0000  0.0008  0.0025  0.0057  0.0226
-##            n_eff   Rhat
-## beta[1]     1926 0.9998
-## beta[2]     1945 0.9996
-## gamma[1]    1900 0.9990
-## gamma[2]    1824 0.9992
-## Sigma[1,1]  1074 1.0010
-## Sigma[1,2]  1178 1.0007
-## Sigma[2,1]  1178 1.0007
-## Sigma[2,2]   908 1.0019
+##               mean se_mean     sd    2.5%     25%     50%     75%   97.5% n_eff   Rhat
+## beta[1]    -1.3092  0.0292 1.2809 -3.8337 -2.1479 -1.3262 -0.4458  1.2204  1926 0.9998
+## beta[2]    -0.0345  0.0036 0.1597 -0.3591 -0.1371 -0.0328  0.0761  0.2627  1945 0.9996
+## gamma[1]   -2.2311  0.0155 0.6742 -3.6310 -2.6839 -2.2026 -1.7777 -0.9455  1900 0.9990
+## gamma[2]    0.2479  0.0019 0.0823  0.0969  0.1913  0.2454  0.3029  0.4208  1824 0.9992
+## Sigma[1,1]  0.2444  0.0133 0.4355  0.0005  0.0254  0.1105  0.2895  1.3953  1074 1.0010
+## Sigma[1,2] -0.0123  0.0014 0.0471 -0.1006 -0.0098 -0.0012  0.0010  0.0095  1178 1.0007
+## Sigma[2,1] -0.0123  0.0014 0.0471 -0.1006 -0.0098 -0.0012  0.0010  0.0095  1178 1.0007
+## Sigma[2,2]  0.0047  0.0003 0.0083  0.0000  0.0008  0.0025  0.0057  0.0226   908 1.0019
 ## 
 ## Samples were drawn using NUTS(diag_e) at Mon Mar 29 00:35:21 2021.
 ## For each parameter, n_eff is a crude measure of effective sample size,
@@ -2337,6 +2328,10 @@ for (i in seq_along(bl_immig_vals)) {
   eta0 &lt;- X0 %*% t(beta) + Z0 %*% t(gamma)
   eta1 &lt;- X1 %*% t(beta) + Z1 %*% t(gamma)
   
+  # Get unit-specific probabilities
+  pi0 &lt;- plogis(eta0)
+  pi1 &lt;- plogis(eta1)
+
   # Get unit-specific conditional marginal effects
   cme &lt;- plogis(eta1) - plogis(eta0)
   
@@ -2347,7 +2342,9 @@ for (i in seq_along(bl_immig_vals)) {
 # Export newly created objects to global environment
 export(environment())</code></pre>
 <pre><code>## [1] &quot;Exported objects:&quot;
-## character(0)</code></pre>
+##  [1] &quot;bl_immig_vals&quot; &quot;came&quot;          &quot;cme&quot;           &quot;eta0&quot;          &quot;eta1&quot;          &quot;gamma&quot;        
+##  [7] &quot;J&quot;             &quot;jj&quot;            &quot;L&quot;             &quot;none&quot;          &quot;pars&quot;          &quot;pi0&quot;          
+## [13] &quot;pi1&quot;           &quot;X0&quot;            &quot;X1&quot;            &quot;z&quot;             &quot;Z0&quot;            &quot;Z1&quot;</code></pre>
 </div>
 <div id="visualization" class="section level3" number="5.3">
 <h3><span class="header-section-number">5.3</span> Visualization</h3>
