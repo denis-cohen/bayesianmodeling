@@ -25,6 +25,7 @@ library(learnr)
 ```{r, echo=FALSE}
 ## --- Options ---
 eval_ex <- TRUE
+echo_ex <- FALSE
 eval_sol <- TRUE
 echo_sol <- FALSE
 eval_learnr <- TRUE
@@ -34,6 +35,7 @@ eval_learnr_sol <- TRUE
 ```{r, echo=FALSE, context="server"}
 ## --- Options ---
 eval_ex <- TRUE
+echo_ex <- FALSE
 eval_sol <- TRUE
 echo_sol <- FALSE
 eval_learnr <- TRUE

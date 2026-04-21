@@ -132,7 +132,7 @@ Generate all required data inputs and collect them in an appropriately named lis
 
 Make sure to include `se_self` and `la_self` and the corresponding product term, alongside the following background covariates: `age`, `fem`, and `east`.
 
-```{r data, exercise=TRUE, eval=eval_ex}
+```{r data, exercise=TRUE, eval=eval_ex, echo=echo_ex}
 # Define data
 ...
 
@@ -172,7 +172,7 @@ export(environment())
 
 Now, compile your Stan program from the (pre-loaded) character string `lm_code`.
 
-```{r compilation, exercise=TRUE, eval=eval_ex, exercise.timelimit = 120}
+```{r compilation, exercise=TRUE, eval=eval_ex, echo=echo_ex, exercise.timelimit = 120}
 lm_mod <- ...
 
 # Export newly created objects to global environment
@@ -192,7 +192,7 @@ Estimate your model and store the `stanfit` object.
 
 *Note:* The `stanfit` object will be preloaded in the next step, even if you hit a time-out here.
 
-```{r estimation, exercise=TRUE, eval=eval_ex}
+```{r estimation, exercise=TRUE, eval=eval_ex, echo=echo_ex}
 lm_est <- ...
 
 # Export newly created objects to global environment
@@ -221,7 +221,7 @@ export(environment())
 
 Print your model summary and see if `Rhat` shows any signs of non-convergence.
 
-```{r summary, exercise=TRUE, eval=eval_ex}
+```{r summary, exercise=TRUE, eval=eval_ex, echo=echo_ex}
 
 ```
 
@@ -238,7 +238,7 @@ Extract the posterior draws of your model parameters. Store the draws for `beta`
 in a separate object. Check the dimensions of that object. What do the rows and
 columns contain?
 
-```{r extraction, exercise=TRUE, eval=eval_ex}
+```{r extraction, exercise=TRUE, eval=eval_ex, echo=echo_ex}
 beta_draws <- ...
 
 # Export newly created objects to global environment
@@ -293,7 +293,7 @@ Three things will be different this time around:
 
 Let's give it a try:
 
-```{r qoi-posterior, exercise=TRUE, eval=eval_ex}
+```{r qoi-posterior, exercise=TRUE, eval=eval_ex, echo=echo_ex}
 ...
 
 # Export newly created objects to global environment
@@ -349,7 +349,7 @@ the posterior median and the 95% credible interval.
 to those dimensions you would like to retain. But beware: The dimensions of
 the resulting object may be different from what you would intuitively expect.
 
-```{r qoi-summary, exercise=TRUE, eval=eval_ex}
+```{r qoi-summary, exercise=TRUE, eval=eval_ex, echo=echo_ex}
 pred_summary <- ...
 
 # Export newly created objects to global environment
@@ -368,7 +368,7 @@ export(environment())
 You guessed it: We can now use `regplane3D::plane3D()` on `pred_summary` to
 visualize our expected values, much like we did yesterday.
 
-```{r viz, exercise=TRUE, eval=eval_ex, fig.align='center', fig.width = 9, fig.height=6, exercise.timelimit = 120}
+```{r viz, exercise=TRUE, eval=eval_ex, echo=echo_ex, fig.align='center', fig.width = 9, fig.height=6, exercise.timelimit = 120}
 # Change array dimensions to make them compatible with plane3D()
 pred_summary <- aperm(pred_summary, perm = c(2, 3, 1))
 

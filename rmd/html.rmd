@@ -9,8 +9,9 @@ output:
 
 ```{r, echo=FALSE}
 eval_ex <- FALSE
-eval_sol <- TRUE
-echo_sol <- TRUE
+echo_ex <- TRUE
+eval_sol <- FALSE
+echo_sol <- FALSE
 eval_learnr <- TRUE
 eval_learnr_sol <- FALSE
 

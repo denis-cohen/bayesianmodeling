@@ -28,8 +28,8 @@ inline_child <- function(lines, output_path) {
 
 ## Meta information ----
 meta <- rio::import("rmd/meta.csv") %>%
-  dplyr::slice(9, 11)
-formats <- c("learnr", "html", "html_sol")
+  dplyr::slice(10)
+formats <- c("html")
 
 ## Apply function within nested loop ----
 for (i in seq_len(nrow(meta))) {

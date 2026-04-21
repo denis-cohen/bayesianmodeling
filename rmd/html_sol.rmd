@@ -10,6 +10,7 @@ output:
 
 ```{r, echo=FALSE}
 eval_ex <- FALSE
+echo_ex <- FALSE
 eval_sol <- TRUE
 echo_sol <- TRUE
 eval_learnr <- TRUE
