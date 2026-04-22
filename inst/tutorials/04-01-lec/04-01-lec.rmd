@@ -25,6 +25,7 @@ library(learnr)
 ```{r, echo=FALSE}
 ## --- Options ---
 eval_ex <- TRUE
+echo_ex <- FALSE
 eval_sol <- TRUE
 echo_sol <- FALSE
 eval_learnr <- TRUE
@@ -34,6 +35,7 @@ eval_learnr_sol <- TRUE
 ```{r, echo=FALSE, context="server"}
 ## --- Options ---
 eval_ex <- TRUE
+echo_ex <- FALSE
 eval_sol <- TRUE
 echo_sol <- FALSE
 eval_learnr <- TRUE
@@ -890,7 +892,7 @@ for (i in seq_along(bl_immig_vals)) {
   pi1 <- plogis(eta1)
 
   # Get unit-specific conditional marginal effects
-  cme <- plogis(eta1) - plogis(eta0)
+  cme <- pi1 - pi0
   
   # Average across observations, take quantiles
   came[i, ] <- quantile(apply(cme, 2, mean), c(.5, .025, .975))
